@@ -6,61 +6,18 @@
   "scripts": {
     "build-app": "babel app -d dist --copy-files",
     "build-static": "npm run build-dll-pro && npm run build-src",
-    "build-src": "bnr pro:build:src",
-    "build-dll": "bnr local:build:dll",
-    "build-dll-pro": "bnr pro:build:dll",
+    "build-src": "cross-env NODE_ENV=production webpack --progress --colors --config frontend/webpack/webpack.production.js -p",
+    "build-dll": "cross-env NODE_ENV=localdev webpack --config frontend/webpack/webpack.dll.js --progress --colors",
+    "build-dll-pro": "cross-env NODE_ENV=production webpack --config frontend/webpack/webpack.dll.js --progress --colors -p",
     "start-dev": "npm run build-dll && npm run start-app",
-    "start-app": "bnr local:app:start & bnr local:build:src",
-    "start": "bnr pro:app:start",
-    "stop": "bnr pro:app:stop",
+    "start-app": "npm run start-app:server & npm run start-app:client",
+    "start-app:server": "cross-env NODE_ENV=localdev DEBUG=hacknical-local* nodemon app/index.js",
+    "start-app:client": "cross-env NODE_ENV=localdev webpack --progress --colors --config frontend/webpack/webpack.dev.js --watch",
+    "start": "cross-env NODE_ENV=production forever start --killSignal=SIGTERM -a -l /var/log/ecmadao/hacknical/forever_log -e /var/log/ecmadao/hacknical/error_log dist/bin/app.js",
+    "stop": "cross-env NODE_ENV=production forever stop dist/bin/app.js",
     "precommit": "npm run lint",
     "lint": "./node_modules/.bin/eslint frontend/* && ./node_modules/.bin/eslint app/*",
     "deploy": "git checkout master && git pull origin master && npm i && npm i --only=dev && bash ./scripts/deploy.sh"
-  },
-  "betterScripts": {
-    "pro:build:src": {
-      "command": "./node_modules/webpack/bin/webpack.js --progress --colors --config frontend/webpack/webpack.production.js -p",
-      "env": {
-        "NODE_ENV": "production"
-      }
-    },
-    "local:build:src": {
-      "command": "./node_modules/webpack/bin/webpack.js --progress --colors --config frontend/webpack/webpack.dev.js --watch",
-      "env": {
-        "NODE_ENV": "localdev"
-      }
-    },
-    "pro:build:dll": {
-      "command": "./node_modules/webpack/bin/webpack.js --config frontend/webpack/webpack.dll.js --progress --colors -p",
-      "env": {
-        "NODE_ENV": "production"
-      }
-    },
-    "local:build:dll": {
-      "command": "./node_modules/webpack/bin/webpack.js --config frontend/webpack/webpack.dll.js --progress --colors",
-      "env": {
-        "NODE_ENV": "localdev"
-      }
-    },
-    "pro:app:start": {
-      "command": "forever start --killSignal=SIGTERM -a -l /var/log/ecmadao/hacknical/forever_log -e /var/log/ecmadao/hacknical/error_log dist/bin/app.js",
-      "env": {
-        "NODE_ENV": "production"
-      }
-    },
-    "pro:app:stop": {
-      "command": "forever stop dist/bin/app.js",
-      "env": {
-        "NODE_ENV": "production"
-      }
-    },
-    "local:app:start": {
-      "command": "./node_modules/.bin/nodemon app/index.js",
-      "env": {
-        "DEBUG": "hacknical-local*",
-        "NODE_ENV": "localdev"
-      }
-    }
   },
   "author": "ecmadao",
   "license": "Apache-2.0",
@@ -74,7 +31,7 @@
     "@babel/preset-react": "^7.24.0",
     "autoprefixer": "^7.2.5",
     "babel-loader": "^8.4.1",
-    "better-npm-run": "0.0.13",
+    "cross-env": "^7.0.3",
     "brotli-webpack-plugin": "^0.5.0",
     "cal-heatmap": "^3.6.2",
     "chart.js": "2.4.0",
