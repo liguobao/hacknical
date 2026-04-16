@@ -16,7 +16,7 @@ entryFiles
   .forEach(file => {
     const filename = file.split('.')[0]
     const filepath = path.join(PATH.ENTRY_PATH, file)
-    entries[filename] = ['babel-polyfill', filepath]
+    entries[filename] = ['core-js/stable', 'regenerator-runtime/runtime', filepath]
 })
 
 const postcssLoader = {

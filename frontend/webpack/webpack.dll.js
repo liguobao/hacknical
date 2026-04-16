@@ -71,7 +71,8 @@ module.exports = {
       'history'
     ],
     runtime: [
-      'babel-polyfill',
+      'core-js/stable',
+      'regenerator-runtime/runtime',
       'moment',
       'classnames',
       'prop-types'
