@@ -2,53 +2,57 @@
 import fs from 'fs'
 import path from 'path'
 import config from 'config'
-import phantom from 'phantom'
+import puppeteer from 'puppeteer-core'
 import PATH from '../../config/path'
 import logger from '../utils/logger'
 import { ensureFolder } from '../utils/files'
 import { uploadFile } from '../utils/uploader'
 
-const waitUntil = asyncFunc => new Promise((resolve, reject) => {
-  const wait = () => {
-    asyncFunc().then((value) => {
-      if (value === true) {
-        resolve()
-      } else {
-        setTimeout(wait, 100)
-      }
-    }).catch(reject)
-  }
-  wait()
+const CHROMIUM_PATH = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium'
+
+const launchBrowser = () => puppeteer.launch({
+  executablePath: CHROMIUM_PATH,
+  headless: true,
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage'
+  ]
 })
 
-const renderScreenshot = async ({ input, output, pageConfig = {} }) => {
-  const instance = await phantom.create()
+const renderPdf = async ({ input, output, pageConfig = {} }) => {
+  const browser = await launchBrowser()
 
   try {
-    const page = await instance.createPage()
+    const page = await browser.newPage()
 
     if (pageConfig.pageStyle === 'onePage') {
-      await page.property('viewportSize', { width: 1024, height: 600 })
-    } else {
-      await page.property('paperSize', {
-        width: 1024,
-        height: 1448,
-        format: 'A4',
-        margin: {
-          top: '1cm',
-          bottom: '1cm',
-        },
-        orientation: 'portrait'
-      })
+      await page.setViewport({ width: 1024, height: 600 })
     }
 
-    await page.open(input)
-    await waitUntil(() => page.evaluate(() => window.done))
-    await page.render(output)
+    await page.goto(input, { waitUntil: 'networkidle0', timeout: 60000 })
+    // 等前端渲染完成（与原 phantom 行为一致：window.done 为 true）
+    await page.waitForFunction('window.done === true', { timeout: 60000 })
+
+    const pdfOptions = pageConfig.pageStyle === 'onePage'
+      ? {
+          path: output,
+          width: '1024px',
+          height: '600px',
+          printBackground: true
+        }
+      : {
+          path: output,
+          format: 'A4',
+          printBackground: true,
+          margin: { top: '1cm', bottom: '1cm' }
+        }
+
+    await page.pdf(pdfOptions)
   } catch (e) {
     logger.error(e.stack || e)
   } finally {
-    await instance.exit()
+    await browser.close()
   }
 }
 
@@ -76,7 +80,7 @@ export const downloadResume = async (url, options = {}) => {
     return resultPath
   }
 
-  await renderScreenshot({
+  await renderPdf({
     input: url,
     output: filePath,
     pageConfig: {

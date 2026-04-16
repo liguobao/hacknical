@@ -2,14 +2,18 @@
 # M4 是 arm64，Node 12 没有原生包，强制用 linux/amd64 通过 Rosetta 跑
 FROM --platform=linux/amd64 node:12.22.12-bullseye-slim
 
-# node-gyp 需要 python2 和 build 工具，phantom 需要 bzip2 解压 PhantomJS
+# node-gyp 需要 python2 和 build 工具
+# chromium 给 puppeteer-core 用（生成简历 PDF）
+# fonts-noto-cjk 用于中文字符渲染
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python2 \
     make \
     g++ \
-    bzip2 \
     ca-certificates \
     git \
+    chromium \
+    fonts-liberation \
+    fonts-noto-cjk \
     && rm -rf /var/lib/apt/lists/* \
     && ln -sf /usr/bin/python2 /usr/local/bin/python
 
@@ -18,11 +22,11 @@ WORKDIR /app
 # 先只拷贝 package.json，用 docker 缓存层加速重建
 COPY package.json ./
 
-# 关掉 phantomjs 的 SSL 校验（旧的下载源问题），加大 npm 超时
+# puppeteer-core 不下载内置 chromium，用 apt 装的那个
 ENV NPM_CONFIG_LOGLEVEL=warn \
-    PHANTOMJS_CDNURL=https://npmmirror.com/mirrors/phantomjs \
     SASS_BINARY_SITE=https://npmmirror.com/mirrors/node-sass \
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    PUPPETEER_SKIP_DOWNLOAD=true
 
 # 用 npmmirror 加速国内下载
 RUN npm config set registry https://registry.npmmirror.com \
