@@ -1,0 +1,6 @@
+{
+  "watch": ["app", "config"],
+  "ext": "js,json",
+  "ignore": ["public/**", "frontend/**", "dist/**", "node_modules/**", "log/**"],
+  "delay": 500
+}

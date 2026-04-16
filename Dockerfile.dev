@@ -1,0 +1,34 @@
+# 老项目使用 Node 12（package.json 里多个 dep 是 2018 年的版本）
+# M4 是 arm64，Node 12 没有原生包，强制用 linux/amd64 通过 Rosetta 跑
+FROM --platform=linux/amd64 node:12.22.12-bullseye-slim
+
+# node-gyp 需要 python2 和 build 工具，phantom 需要 bzip2 解压 PhantomJS
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python2 \
+    make \
+    g++ \
+    bzip2 \
+    ca-certificates \
+    git \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python2 /usr/local/bin/python
+
+WORKDIR /app
+
+# 先只拷贝 package.json，用 docker 缓存层加速重建
+COPY package.json ./
+
+# 关掉 phantomjs 的 SSL 校验（旧的下载源问题），加大 npm 超时
+ENV NPM_CONFIG_LOGLEVEL=warn \
+    PHANTOMJS_CDNURL=https://npmmirror.com/mirrors/phantomjs \
+    SASS_BINARY_SITE=https://npmmirror.com/mirrors/node-sass \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
+# 用 npmmirror 加速国内下载
+RUN npm config set registry https://registry.npmmirror.com \
+    && npm install --unsafe-perm --no-audit --no-fund --legacy-peer-deps || npm install --unsafe-perm --no-audit --no-fund
+
+# 源码后续通过 volume 挂载进来
+EXPOSE 4000
+
+CMD ["npm", "run", "start-dev"]

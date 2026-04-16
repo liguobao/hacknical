@@ -1,0 +1,74 @@
+# Hacknical 本地开发环境
+# 由于项目依赖 Node 12（M4 arm64 上无法本地安装），整个 app 也跑在容器里
+#
+# 启动: docker compose up -d --build
+# 查看日志: docker compose logs -f app
+# 进入容器: docker compose exec app bash
+# 停止: docker compose down
+# 清空数据: docker compose down -v
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: hacknical-redis
+    ports:
+      # 宿主端口避开默认 6379，需要 redis-cli 调试时连 127.0.0.1:6390
+      - "127.0.0.1:6390:6379"
+    volumes:
+      - hacknical-redis-data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  besticon:
+    # 抓取网站 favicon 的小服务，对应 services.besticon
+    image: matthiasluedtke/iconserver:latest
+    container_name: hacknical-besticon
+    ports:
+      - "127.0.0.1:8088:8080"
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: hacknical-app
+    platform: linux/amd64
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=localdev
+      - DEBUG=hacknical-local*
+      # 假的 OSS 凭证，让 ali-oss 模块能加载（本地不会真正上传文件）
+      - HACKNICAL_ALI_ACCESS_ID=dummy-id
+      - HACKNICAL_ALI_ACCESS_KEY=dummy-key
+    volumes:
+      # 把源码挂进去做热更新
+      - ./app:/app/app
+      - ./frontend:/app/frontend
+      - ./config:/app/config
+      - ./public:/app/public
+      - ./scripts:/app/scripts
+      - ./.babelrc:/app/.babelrc
+      - ./.eslintrc:/app/.eslintrc
+      - ./.eslintignore:/app/.eslintignore
+      # git-rev-sync 需要读 commit hash 做版本号
+      - ./.git:/app/.git:ro
+      - ./package.json:/app/package.json
+      - ./nodemon.json:/app/nodemon.json
+      # node_modules 用容器自己的，不被宿主覆盖
+      - hacknical-node-modules:/app/node_modules
+    depends_on:
+      redis:
+        condition: service_healthy
+      besticon:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  hacknical-redis-data:
+  hacknical-node-modules:
