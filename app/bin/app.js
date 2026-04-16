@@ -27,6 +27,7 @@ import firewallMiddleware from '../middlewares/firewall'
 // Handle unhandled promise rejections for Redis queue
 process.on('unhandledRejection', (reason, promise) => {
   const reasonText = [
+    reason && reason.name,
     reason && reason.message,
     typeof reason === 'string' ? reason : '',
     reason && typeof reason.inspect === 'function' ? String(reason.inspect()) : ''

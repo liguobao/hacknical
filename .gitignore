@@ -9,3 +9,4 @@
 .vscode
 /log
 /app/config/webpack-assets.json
+.DS_Store
