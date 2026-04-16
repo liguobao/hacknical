@@ -1,12 +1,11 @@
-# 老项目使用 Node 12（package.json 里多个 dep 是 2018 年的版本）
-# M4 是 arm64，Node 12 没有原生包，强制用 linux/amd64 通过 Rosetta 跑
-FROM --platform=linux/amd64 node:12.22.12-bullseye-slim
+# Node 22 开发镜像，兼容现代工具链，也能在 Apple Silicon 上原生运行
+FROM node:22-bookworm-slim
 
-# node-gyp 需要 python2 和 build 工具
+# node-gyp 需要 python3 和构建工具
 # chromium 给 puppeteer-core 用（生成简历 PDF）
 # fonts-noto-cjk 用于中文字符渲染
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python2 \
+    python3 \
     make \
     g++ \
     ca-certificates \
@@ -14,8 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium \
     fonts-liberation \
     fonts-noto-cjk \
-    && rm -rf /var/lib/apt/lists/* \
-    && ln -sf /usr/bin/python2 /usr/local/bin/python
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -24,7 +22,6 @@ COPY package.json ./
 
 # puppeteer-core 不下载内置 chromium，用 apt 装的那个
 ENV NPM_CONFIG_LOGLEVEL=warn \
-    SASS_BINARY_SITE=https://npmmirror.com/mirrors/node-sass \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     PUPPETEER_SKIP_DOWNLOAD=true
 

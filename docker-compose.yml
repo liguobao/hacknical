@@ -37,12 +37,16 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     container_name: hacknical-app
-    platform: linux/amd64
     ports:
       - "4000:4000"
     environment:
       - NODE_ENV=localdev
       - DEBUG=hacknical-local*
+      - HACKNICAL_REDIS_HOST=redis
+      - HACKNICAL_REDIS_PORT=6379
+      - HACKNICAL_BESTICON_URL=http://besticon:8080
+      - HACKNICAL_MQ_HOST=redis
+      - HACKNICAL_MQ_PORT=6379
       # 假的 OSS 凭证，让 ali-oss 模块能加载（本地不会真正上传文件）
       - HACKNICAL_ALI_ACCESS_ID=dummy-id
       - HACKNICAL_ALI_ACCESS_KEY=dummy-key

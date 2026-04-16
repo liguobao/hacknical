@@ -36,17 +36,17 @@ const renderPdf = async ({ input, output, pageConfig = {} }) => {
 
     const pdfOptions = pageConfig.pageStyle === 'onePage'
       ? {
-          path: output,
-          width: '1024px',
-          height: '600px',
-          printBackground: true
-        }
+        path: output,
+        width: '1024px',
+        height: '600px',
+        printBackground: true
+      }
       : {
-          path: output,
-          format: 'A4',
-          printBackground: true,
-          margin: { top: '1cm', bottom: '1cm' }
-        }
+        path: output,
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '1cm', bottom: '1cm' }
+      }
 
     await page.pdf(pdfOptions)
   } catch (e) {

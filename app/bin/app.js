@@ -26,7 +26,13 @@ import firewallMiddleware from '../middlewares/firewall'
 
 // Handle unhandled promise rejections for Redis queue
 process.on('unhandledRejection', (reason, promise) => {
-  if (reason && reason.message && reason.message.includes('queueExists')) {
+  const reasonText = [
+    reason && reason.message,
+    typeof reason === 'string' ? reason : '',
+    reason && typeof reason.inspect === 'function' ? String(reason.inspect()) : ''
+  ].filter(Boolean).join(' ')
+
+  if (reasonText.includes('queueExists')) {
     logger.debug('Redis queue already exists, continuing...')
     return
   }

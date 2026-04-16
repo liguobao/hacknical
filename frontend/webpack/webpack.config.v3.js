@@ -1,10 +1,12 @@
-
 const path = require('path')
 const fs = require('fs')
 const webpack = require('webpack')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const AssetsPlugin = require('assets-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const EntryAssetsManifestPlugin = require('./plugins/entry-assets-manifest-plugin')
 const PATH = require('../../config/path')
+
+const env = process.env.NODE_ENV || 'localdev'
+const isProduction = env === 'production'
 
 const entryFiles = fs.readdirSync(PATH.ENTRY_PATH)
 const entries = {}
@@ -17,92 +19,90 @@ entryFiles
     const filename = file.split('.')[0]
     const filepath = path.join(PATH.ENTRY_PATH, file)
     entries[filename] = ['core-js/stable', 'regenerator-runtime/runtime', filepath]
-})
+  })
 
-const postcssLoader = {
-  loader: 'postcss-loader',
-  options: {
-    config: {
-      path: path.join(__dirname, 'postcss.config.js')
+const createCssLoader = ({ modules = false, lightUi = false }) => {
+  const cssLoaderOptions = {
+    importLoaders: 1,
+    sourceMap: true
+  }
+
+  if (modules) {
+    cssLoaderOptions.modules = {
+      localIdentName: '[name]__[local]___[hash:base64:5]'
     }
   }
+
+  const loaders = [
+    MiniCssExtractPlugin.loader,
+    {
+      loader: 'css-loader',
+      options: cssLoaderOptions
+    },
+    {
+      loader: 'postcss-loader',
+      options: {
+        sourceMap: true,
+        postcssOptions: {
+          config: false,
+          ...require('./postcss.config')
+        }
+      }
+    }
+  ]
+
+  if (lightUi) {
+    loaders.splice(2, 0, {
+      loader: path.join(__dirname, 'loaders/light-ui-compose-loader.js')
+    })
+  }
+
+  return loaders
 }
 
-const cssModulesLoader = ExtractTextPlugin.extract({
-  fallback: 'style-loader',
-  use: [
-    {
-      loader: 'css-loader',
-      options: {
-        modules: true,
-        sourceMaps: true,
-        importLoaders: 1,
-        localIdentName: '[name]__[local]___[hash:base64:5]'
-      }
-    },
-    postcssLoader
-  ]
-})
-const cssLoader = ExtractTextPlugin.extract({
-  fallback: 'style-loader',
-  use: [
-    {
-      loader: 'css-loader',
-      options: {
-        sourceMaps: true,
-        importLoaders: 1,
-      }
-    },
-    postcssLoader
-  ]
-})
-
 module.exports = {
+  mode: isProduction ? 'production' : 'development',
   context: PATH.ROOT_PATH,
   entry: entries,
   output: {
-    filename: '[name].bundle.js',
+    filename: isProduction ? '[name].bundle.[contenthash:8].js' : '[name].bundle.js',
     path: PATH.BUILD_PATH,
-    publicPath: PATH.PUBLIC_PATH
+    publicPath: PATH.PUBLIC_PATH,
+    clean: true,
+    assetModuleFilename: isProduction ? '[name].[contenthash:8][ext]' : '[name][ext]'
+  },
+  cache: {
+    type: 'filesystem',
+    buildDependencies: {
+      config: [
+        __filename,
+        path.join(__dirname, 'postcss.config.js'),
+        path.join(__dirname, 'plugins/entry-assets-manifest-plugin.js')
+      ]
+    }
   },
   module: {
     rules: [
       {
-        test: require.resolve('jquery'),
-        use: [
+        test: /\.css$/,
+        oneOf: [
           {
-            loader: 'expose-loader',
-            options: 'jQuery'
+            include: path.join(PATH.SOURCE_PATH, 'src/vendor'),
+            use: createCssLoader({ modules: false })
           },
           {
-            loader: 'expose-loader',
-            options: '$'
+            include: /light-ui/,
+            use: createCssLoader({ modules: true, lightUi: true })
+          },
+          {
+            include: PATH.SOURCE_PATH,
+            use: createCssLoader({ modules: true })
+          },
+          {
+            include: PATH.MODULES_PATH,
+            use: createCssLoader({ modules: false })
           }
         ]
-      },
-      {
-        test: /\.css$/,
-        include: PATH.SOURCE_PATH,
-        exclude: path.join(PATH.SOURCE_PATH, 'src/vendor'),
-        loader: cssModulesLoader,
-      },
-      {
-        test: /\.css$/,
-        include: /light-ui/,
-        // include: /(lib\/react|lib\/raw)/,
-        loader: cssModulesLoader,
-      },
-      {
-        test: /\.css$/,
-        loader: cssLoader,
-        include: PATH.MODULES_PATH,
-        exclude: /light-ui/
-        // exclude: /(lib\/react|lib\/raw)/,
-      },
-      {
-        test: /\.css$/,
-        loader: cssLoader,
-        include: path.join(PATH.SOURCE_PATH, 'src/vendor')
       },
       {
         test: /\.jsx?$/,
@@ -111,21 +111,18 @@ module.exports = {
       },
       {
         test: /\.(eot|ttf|woff|woff2|otf)(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'file-loader',
-        options: {
-          limit: 5000,
-          name: '[name].[ext]'
-        }
+        type: 'asset/resource'
       },
       {
         test: /\.(jpe?g|png|gif|svg)\??.*$/,
-        loader: 'url-loader',
-        options: {
-          limit: 8192,
-          name: '[name].[ext]'
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8192
+          }
         }
       }
-    ],
+    ]
   },
   resolve: {
     modules: ['node_modules'],
@@ -141,25 +138,19 @@ module.exports = {
       LOCALES: path.join(PATH.SOURCE_PATH, 'utils/locales')
     }
   },
+  optimization: {
+    splitChunks: false,
+    runtimeChunk: false
+  },
   plugins: [
     new webpack.ProvidePlugin({
       $: 'jquery',
-      jQuery: 'jquery',
-      'window.jQuery': 'jquery'
+      jQuery: 'jquery'
     }),
-    new AssetsPlugin({
-      path: PATH.BUILD_PATH,
-      filename: 'webpack-assets.json',
-      update: true,
-      prettyPrint: true
-    }),
-    new webpack.DllReferencePlugin({
-      context: PATH.ROOT_PATH,
-      manifest: require(path.join(PATH.BUILD_PATH, 'react-manifest.json'))
-    }),
-    new webpack.DllReferencePlugin({
-      context: PATH.ROOT_PATH,
-      manifest: require(path.join(PATH.BUILD_PATH, 'runtime-manifest.json'))
+    new EntryAssetsManifestPlugin(),
+    new MiniCssExtractPlugin({
+      filename: isProduction ? '[name].bundle.[contenthash:8].css' : '[name].bundle.css',
+      ignoreOrder: true
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),

@@ -1,0 +1,17 @@
+{
+  "services": {
+    "redis": {
+      "host": "HACKNICAL_REDIS_HOST",
+      "port": "HACKNICAL_REDIS_PORT"
+    },
+    "besticon": {
+      "url": "HACKNICAL_BESTICON_URL"
+    }
+  },
+  "mq": {
+    "config": {
+      "host": "HACKNICAL_MQ_HOST",
+      "port": "HACKNICAL_MQ_PORT"
+    }
+  }
+}

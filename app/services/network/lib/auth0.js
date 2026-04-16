@@ -2,20 +2,20 @@ import config from 'config'
 
 const ttl = 604800
 
-const auth0Credential = (function() {
-  const auth0Config = config.get("services.auth0")
-  const auth = auth0Config.auth
+const auth0Credential = (() => {
+  const auth0Config = config.get('services.auth0')
+  const { auth } = auth0Config
   const domain = auth0Config.url || process.env.AUTH0_DOMAIN
   return {
     clientId: auth.clientId || process.env.AUTH0_CLIENT_ID,
     clientSecret: auth.clientSecret || process.env.AUTH0_CLIENT_SECRET,
     redirectUri: auth.redirectUri || process.env.AUTH0_REDIRECT_URI,
     audience: `${domain}/api/v2/`,
-    domain,
+    domain
   }
 })()
 
-const getAccessToken = (code) => ({
+const getAccessToken = code => ({
   url: '/oauth/token',
   method: 'post',
   headers: {
@@ -30,7 +30,7 @@ const getAccessToken = (code) => ({
   }
 })
 
-const getUserInfo = (accessToken) => ({
+const getUserInfo = accessToken => ({
   url: '/userinfo',
   method: 'get',
   headers: {
