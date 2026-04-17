@@ -5,19 +5,35 @@ import fs from 'fs'
 import PATH from '../../config/path'
 import logger from '../utils/logger'
 
-let manifest = {}
 const manifestPathList = [
   path.resolve(PATH.BUILD_PATH, 'webpack-assets.json'),
   path.resolve(__dirname, '../config', 'webpack-assets.json')
 ]
 
-const manifestPath = manifestPathList.find(filePath => fs.existsSync(filePath))
+let manifest = {}
+let manifestMtimeMs = 0
 
-if (manifestPath) {
-  manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+const loadManifest = () => {
+  const manifestPath = manifestPathList.find(filePath => fs.existsSync(filePath))
+  if (!manifestPath) return
+
+  try {
+    const { mtimeMs } = fs.statSync(manifestPath)
+    if (mtimeMs === manifestMtimeMs) return
+    manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+    manifestMtimeMs = mtimeMs
+    logger.info(`[ASSETS] manifest reloaded from ${manifestPath}`)
+  } catch (e) {
+    logger.error(`[ASSETS] failed to load manifest: ${e.message}`)
+  }
 }
 
-const getAssetName = asset => manifest[asset]
+loadManifest()
+
+const getAssetName = (asset) => {
+  loadManifest()
+  return manifest[asset]
+}
 
 const assetsMiddleware = (assetsName) => {
   const finalName = assetsName.split('/').slice(-1)[0]
