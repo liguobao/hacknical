@@ -88,7 +88,7 @@
     "@babel/register": "^7.23.0",
     "@babel/runtime": "^7.24.0",
     "@koa/cors": "^5.0.0",
-    "@koa/router": "^13.1.1",
+    "@koa/router": "^15.4.0",
     "@sentry/browser": "^4.5.2",
     "ali-oss": "^6.3.1",
     "cache-manager": "^2.9.0",
