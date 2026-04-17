@@ -23,6 +23,7 @@ entryFiles
 
 const createCssLoader = ({ modules = false, lightUi = false }) => {
   const cssLoaderOptions = {
+    esModule: false,
     importLoaders: 1,
     sourceMap: true
   }

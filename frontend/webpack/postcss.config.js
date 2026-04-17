@@ -13,6 +13,7 @@ module.exports = {
       },
       features: {
         'custom-properties': {
+          disableDeprecationNotice: true,
           preserve: false
         }
       }
