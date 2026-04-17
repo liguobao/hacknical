@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { renderRoutes } from 'react-router-config'
-import { ConnectedRouter } from 'react-router-redux'
 import { Provider } from 'react-redux'
+import { Router } from 'react-router-dom'
 import { removeDOM } from 'UTILS/helper'
 import * as Sentry from '@sentry/browser'
 
@@ -39,9 +39,9 @@ class AppContainer extends React.Component {
     const { history, routes, store } = this.props
     return (
       <Provider store={store}>
-        <ConnectedRouter history={history}>
+        <Router history={history}>
           {renderRoutes(routes)}
-        </ConnectedRouter>
+        </Router>
       </Provider>
     )
   }

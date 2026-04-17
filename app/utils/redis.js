@@ -12,7 +12,7 @@ const redisConnect = async (prefix = appName.toUpperCase()) => {
   const dbConf = Object.assign({}, redisConfig, {
     keyPrefix: `${prefix}.`
   })
-  const redisDB = await new IoRedis(dbConf)
+  const redisDB = new IoRedis(dbConf)
   instance = redisDB
   return instance
 }

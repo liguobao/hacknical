@@ -1,11 +1,11 @@
 
-import koaRouter from 'koa-router'
+import Router from '@koa/router'
 import GitHub from '../controllers/github'
 import user from '../controllers/helper/user'
 import cache from '../controllers/helper/cache'
 import share from '../controllers/helper/share'
 
-const router = koaRouter({
+const router = new Router({
   prefix: '/api/github'
 })
 

@@ -2,7 +2,7 @@
 
 import fs from 'fs'
 import path from 'path'
-import koaRouter from 'koa-router'
+import Router from '@koa/router'
 import Home from '../controllers/home'
 import GitHub from '../controllers/github'
 import Resume from '../controllers/resume'
@@ -13,7 +13,7 @@ import check from '../controllers/helper/check'
 import cache from '../controllers/helper/cache'
 import session from '../controllers/helper/session'
 
-const router = koaRouter()
+const router = new Router()
 const basename = path.basename(module.filename)
 
 fs.readdirSync(__dirname)

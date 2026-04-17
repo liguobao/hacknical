@@ -46,20 +46,9 @@ class ShareRecords extends React.Component {
     actions.fetchShareData()
   }
 
-  componentDidUpdate() {
-    const { recordsLoading, actions, recordsFetched } = this.props
-    actions.fetchShareData()
-
-    if (recordsLoading || !recordsFetched) return
-    !this.viewDevicesChart && this.renderDevicesChart()
-    !this.viewSourcesChart && this.renderSourcesChart()
-    !this.qrcode && this.renderQrcode()
-    !this.clipboard && this.renderClipboard()
-  }
-
-  componentWillUpdate(nextProps) {
+  componentDidUpdate(prevProps) {
     const { index } = this.props
-    if (index !== nextProps.index) {
+    if (index !== prevProps.index) {
       this.viewDevicesChart && this.viewDevicesChart.destroy()
       this.viewSourcesChart && this.viewSourcesChart.destroy()
       this.clipboard && this.clipboard.destroy()
@@ -69,6 +58,15 @@ class ShareRecords extends React.Component {
       this.qrcode = null
       this.clipboard = null
     }
+
+    const { recordsLoading, actions, recordsFetched } = this.props
+    actions.fetchShareData()
+
+    if (recordsLoading || !recordsFetched) return
+    !this.viewDevicesChart && this.renderDevicesChart()
+    !this.viewSourcesChart && this.renderSourcesChart()
+    !this.qrcode && this.renderQrcode()
+    !this.clipboard && this.renderClipboard()
   }
 
   renderClipboard() {

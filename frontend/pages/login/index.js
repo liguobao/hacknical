@@ -1,15 +1,11 @@
 
 
 import React from 'react'
-import ReactDOM from 'react-dom'
 import LoginPanel from './container'
+import renderRoot from 'UTILS/render'
 
 const renderApp = (domId, props = {}) => {
-  const DOM = document.getElementById(domId)
-  ReactDOM.render(
-    <LoginPanel {...props} />,
-    DOM
-  )
+  renderRoot(domId, <LoginPanel {...props} />)
 }
 
 export default renderApp

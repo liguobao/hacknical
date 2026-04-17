@@ -1,16 +1,16 @@
 
 import React from 'react'
-import ReactDOM from 'react-dom'
 import GitHubComponent from 'SHARED/components/GitHub/Desktop'
 import 'SRC/vendor/share.css'
 import initialHeadroom from 'SRC/vendor/shared/headroom'
+import renderRoot from 'UTILS/render'
 
 const renderApp = (domId, props = {}) => {
-  ReactDOM.render(
+  renderRoot(
+    domId,
     <GitHubComponent
       {...props}
-    />,
-    document.getElementById(domId)
+    />
   )
 }
 

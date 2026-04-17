@@ -1,11 +1,11 @@
 
-import koaRouter from 'koa-router'
+import Router from '@koa/router'
 import Scientific from '../controllers/scientific'
 import cache from '../controllers/helper/cache'
 import check from '../controllers/helper/check'
 import share from '../controllers/helper/share'
 
-const router = koaRouter({
+const router = new Router({
   prefix: '/api/scientific'
 })
 

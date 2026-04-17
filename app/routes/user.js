@@ -1,11 +1,11 @@
 
-import koaRouter from 'koa-router'
+import Router from '@koa/router'
 import User from '../controllers/user'
 import user from '../controllers/helper/user'
 import check from '../controllers/helper/check'
 import cache from '../controllers/helper/cache'
 
-const router = koaRouter({
+const router = new Router({
   prefix: '/api/user'
 })
 

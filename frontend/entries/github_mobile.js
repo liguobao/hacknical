@@ -1,17 +1,16 @@
 
 import React from 'react'
-import ReactDOM from 'react-dom'
 import GitHubMobileShare from 'SHARED/components/GitHub/Mobile'
 import 'SRC/vendor/mobile/github.css'
 import initialHeadroom from 'SRC/vendor/shared/headroom'
+import renderRoot from 'UTILS/render'
 
 const renderApp = (domId, props = {}) => {
-  const DOM = document.getElementById(domId)
-  ReactDOM.render(
+  renderRoot(
+    domId,
     <GitHubMobileShare
       {...props}
-    />,
-    DOM
+    />
   )
 }
 

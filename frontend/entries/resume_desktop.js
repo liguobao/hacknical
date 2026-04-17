@@ -1,15 +1,11 @@
 
 import React from 'react'
-import ReactDOM from 'react-dom'
 import 'SRC/vendor/shared/loading.css'
 import ResumeMobileShare from 'SHARED/components/Resume'
+import renderRoot from 'UTILS/render'
 
 const renderApp = (domId, props = {}) => {
-  const DOM = document.getElementById(domId)
-  ReactDOM.render(
-    <ResumeMobileShare {...props} />,
-    DOM
-  )
+  renderRoot(domId, <ResumeMobileShare {...props} />)
 }
 
 $(() => {

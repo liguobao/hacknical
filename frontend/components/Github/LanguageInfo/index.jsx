@@ -28,12 +28,12 @@ class LanguageInfo extends React.Component {
     this.setShowLanguage = this.setShowLanguage.bind(this)
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { loaded } = this.props
-    if (!loaded && nextProps.loaded) {
+  componentDidUpdate(prevProps) {
+    const { loaded, data } = this.props
+    if (!prevProps.loaded && loaded) {
       this.setState({
-        showLanguage: Object.keys(this.props.data.languages || {})
-          .sort(github.sortByLanguage(this.props.data.languages || {}))[0]
+        showLanguage: Object.keys(data.languages || {})
+          .sort(github.sortByLanguage(data.languages || {}))[0]
       })
     }
   }

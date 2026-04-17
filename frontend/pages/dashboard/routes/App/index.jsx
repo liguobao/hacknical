@@ -17,7 +17,7 @@ const dashboard = {
 }
 
 class App extends React.Component {
-  componentWillMount() {
+  componentDidMount() {
     // https://github.com/ReactTraining/react-router/issues/3854
     const {
       app,

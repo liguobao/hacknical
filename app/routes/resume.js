@@ -1,11 +1,11 @@
 
-import koaRouter from 'koa-router'
+import Router from '@koa/router'
 import Resume from '../controllers/resume'
 import session from '../controllers/helper/session'
 import cache from '../controllers/helper/cache'
 import check from '../controllers/helper/check'
 
-const router = koaRouter({
+const router = new Router({
   prefix: '/api/resume'
 })
 

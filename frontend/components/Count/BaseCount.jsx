@@ -16,17 +16,14 @@ class BaseCount extends React.Component {
     this.start()
   }
 
-  componentDidUpdate(preProps) {
-    const { end } = preProps
+  componentDidUpdate(prevProps) {
+    const { end, start } = prevProps
+    if (this.props.start !== start) {
+      this.setState({ current: this.props.start })
+    }
+
     if (this.props.end !== end) {
       this.start()
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const { start } = nextProps
-    if (start !== this.props.start) {
-      this.setState({ current: start })
     }
   }
 

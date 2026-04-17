@@ -1,14 +1,10 @@
 
 import React from 'react'
-import ReactDOM from 'react-dom'
 import Error from 'PAGES/shared/components/Error'
+import renderRoot from 'UTILS/render'
 
 const renderApp = (domId, props = {}) => {
-  const DOM = document.getElementById(domId)
-  ReactDOM.render(
-    <Error {...props} />,
-    DOM
-  )
+  renderRoot(domId, <Error {...props} />)
 }
 
 export default renderApp

@@ -1,15 +1,11 @@
 
 
 import React from 'react'
-import ReactDOM from 'react-dom'
 import InitialPanel from './container'
+import renderRoot from 'UTILS/render'
 
 const renderApp = (domId, props = {}) => {
-  const DOM = document.getElementById(domId)
-  ReactDOM.render(
-    <InitialPanel {...props} />,
-    DOM
-  )
+  renderRoot(domId, <InitialPanel {...props} />)
 }
 
 export default renderApp
