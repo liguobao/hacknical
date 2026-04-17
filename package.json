@@ -119,7 +119,6 @@
     "react-cropper": "^1.3.0",
     "react-image": "^2.2.2",
     "regenerator-runtime": "^0.14.1",
-    "request": "^2.75.0",
     "shortid": "^2.2.13"
   },
   "repository": {

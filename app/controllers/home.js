@@ -1,9 +1,9 @@
 
+import { Readable } from 'stream'
 import network from '../services/network'
 import getLanguages from '../config/languages'
 import logger from '../utils/logger'
 import notify from '../services/notify'
-import request from 'request'
 import auth0 from '../services/network/lib/auth0'
 
 const cacheControl = (ctx) => {
@@ -171,7 +171,12 @@ const getIcon = async (ctx, next) => {
       if (diff === 0) break
     }
 
-    if (icon) iconUrl = request(icon.url)
+    if (icon) {
+      const iconResponse = await fetch(icon.url)
+      if (iconResponse.ok && iconResponse.body) {
+        iconUrl = Readable.fromWeb(iconResponse.body)
+      }
+    }
   } catch (e) {
     logger.error(e.stack || e.message || e)
     iconUrl = ''

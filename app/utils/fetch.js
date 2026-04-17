@@ -1,4 +1,3 @@
-import request from 'request'
 import config from 'config'
 import iconv from 'iconv-lite'
 import logger from './logger'
@@ -7,6 +6,24 @@ import { REQUEST_JSON_METHODS } from './constant'
 import NewError from './error'
 
 const name = config.get('appName')
+
+const buildQueryString = (qs) => {
+  if (!qs) return ''
+  if (typeof qs === 'string') return qs
+  const params = new URLSearchParams()
+  Object.entries(qs).forEach(([key, value]) => {
+    if (value === undefined || value === null) return
+    params.append(key, String(value))
+  })
+  return params.toString()
+}
+
+const appendQueryString = (url, qs) => {
+  const queryString = buildQueryString(qs)
+  if (!queryString) return url
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}${queryString}`
+}
 
 const verify = (options = {}, appName = name) => {
   const { json = true } = options
@@ -43,24 +60,79 @@ const verify = (options = {}, appName = name) => {
   }
 }
 
-const fetchData = options => new Promise((resolve, reject) => {
-  request(options, (err, httpResponse, body) => {
-    if (err) {
-      reject(err)
-    }
-    if (body) {
-      if (Buffer.isBuffer(body)) {
-        resolve(iconv.decode(body, 'gbk'))
-      }
-      resolve(body.result || body)
-    }
-    reject(
-      new NewError.ServerError(`Unknown Error when fetch: ${JSON.stringify(options)}`)
-    )
-  })
-})
+const fetchData = async (options) => {
+  const {
+    url,
+    method = 'GET',
+    headers = {},
+    body,
+    json = true,
+    qs,
+    timeout,
+    encoding
+  } = options
 
-const fetch = async (options, timeouts = [2000]) => {
+  const targetUrl = appendQueryString(url, qs)
+
+  const init = {
+    method: method.toUpperCase(),
+    headers: { ...headers }
+  }
+
+  if (body !== undefined && body !== null) {
+    if (Buffer.isBuffer(body) || typeof body === 'string') {
+      init.body = body
+    } else if (json) {
+      init.body = JSON.stringify(body)
+      if (!init.headers['Content-Type']) {
+        init.headers['Content-Type'] = 'application/json'
+      }
+    } else {
+      init.body = body
+    }
+  }
+
+  let timer
+  if (timeout) {
+    const controller = new AbortController()
+    init.signal = controller.signal
+    timer = setTimeout(() => controller.abort(), timeout)
+  }
+
+  try {
+    const response = await fetch(targetUrl, init)
+
+    if (encoding === null) {
+      const arrayBuffer = await response.arrayBuffer()
+      return iconv.decode(Buffer.from(arrayBuffer), 'gbk')
+    }
+
+    const text = await response.text()
+
+    if (json) {
+      if (!text) {
+        throw new NewError.ServerError(
+          `Empty response when fetch: ${JSON.stringify(options)}`
+        )
+      }
+      let parsed
+      try {
+        parsed = JSON.parse(text)
+      } catch (e) {
+        throw new NewError.ServerError(
+          `Invalid JSON response when fetch: ${JSON.stringify(options)} - ${text}`
+        )
+      }
+      return parsed.result || parsed
+    }
+
+    return text
+  } finally {
+    if (timer) clearTimeout(timer)
+  }
+}
+
+const fetchWithRetry = async (options, timeouts = [2000]) => {
   verify(options)
 
   let err = null
@@ -88,7 +160,7 @@ const handler = {
     return (...args) => {
       const [options, timeouts] = args
       options.method = method.toUpperCase()
-      return fetch(options, timeouts)
+      return fetchWithRetry(options, timeouts)
     }
   }
 }
