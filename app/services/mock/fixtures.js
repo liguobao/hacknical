@@ -4,6 +4,7 @@ const DEMO_USER_ID = 'demo-user-id'
 const demoUser = {
   userId: DEMO_USER_ID,
   login: DEMO_LOGIN,
+  userName: 'Demo User',
   githubLogin: DEMO_LOGIN,
   githubId: 1,
   githubAvator: 'https://avatars.githubusercontent.com/u/1?v=4',
@@ -115,22 +116,123 @@ const demoOrgs = []
 
 const demoResumeContent = {
   info: {
-    name: 'Demo',
+    name: 'Demo User',
     gender: 'male',
     phone: '13800000000',
     email: 'demo@hacknical.com',
     intention: 'Frontend Engineer',
     location: 'Beijing',
     avator: demoUser.githubAvator,
+    hireAvailable: true,
+    privacyProtect: false,
     freshGraduate: false,
     freshGraduateYear: 2020,
     birthday: '1990-01-01',
-    startWorkingYear: 2020
+    startWorkingYear: 2020,
+    languages: ['JavaScript', 'TypeScript', 'Go']
   },
-  workExperiences: [],
-  educations: [],
-  personalProjects: [],
-  others: { dream: 'Hacking on side projects.' },
+  workExperiences: [
+    {
+      company: 'Hacknical',
+      url: 'https://hacknical.com',
+      startTime: '2022-03',
+      endTime: '',
+      position: 'Senior Frontend Engineer',
+      projects: [
+        {
+          name: 'Hacknical Web',
+          url: 'https://hacknical.com',
+          details: [
+            '负责 Hacknical 简历与 GitHub 数据展示页面的整体前端架构设计与演进。',
+            '基于 React + Redux 搭建组件体系，沉淀 light-ui 组件库，提升团队研发效率。',
+            '推动前端构建工具从 webpack 4 升级到 webpack 5，构建耗时下降约 40%。'
+          ]
+        },
+        {
+          name: 'Resume Builder',
+          url: '',
+          details: [
+            '设计并实现所见即所得的在线简历编辑器，支持自定义模块、一键分享、PDF 导出。',
+            '引入单元测试和 E2E 测试体系，核心模块覆盖率 > 85%。'
+          ]
+        }
+      ]
+    },
+    {
+      company: 'Example Tech',
+      url: 'https://example.com',
+      startTime: '2020-07',
+      endTime: '2022-02',
+      position: 'Frontend Engineer',
+      projects: [
+        {
+          name: 'Growth Platform',
+          url: '',
+          details: [
+            '参与公司增长平台的前端研发，基于 React + TypeScript 构建数据可视化大盘。',
+            '独立完成 A/B 实验投放 SDK，日均 PV 超过 200w。'
+          ]
+        }
+      ]
+    }
+  ],
+  educations: [
+    {
+      school: '清华大学',
+      major: '计算机科学与技术',
+      education: '本科',
+      startTime: '2016-09',
+      endTime: '2020-06',
+      experiences: [
+        '曾担任校 ACM 集训队队长，带队获得区域赛银牌。',
+        '主修方向为软件工程与分布式系统，GPA 3.8 / 4.0。'
+      ]
+    }
+  ],
+  personalProjects: [
+    {
+      url: 'https://github.com/demo/hacknical-web',
+      desc: '开源的 GitHub 数据可视化与在线简历平台，支持多语言、多模板、一键分享。',
+      title: 'hacknical-web',
+      techs: ['React', 'Redux', 'Koa', 'MongoDB']
+    },
+    {
+      url: 'https://github.com/demo/light-ui',
+      desc: '轻量的 React 组件库，覆盖表单、弹窗、导航等常用交互场景。',
+      title: 'light-ui',
+      techs: ['React', 'Sass', 'Rollup']
+    },
+    {
+      url: 'https://github.com/demo/hacknical-server',
+      desc: 'Hacknical 后端服务，基于 Koa 3 + MongoDB，聚合 GitHub 开放 API 数据。',
+      title: 'hacknical-server',
+      techs: ['Koa', 'TypeScript', 'MongoDB', 'Redis']
+    }
+  ],
+  others: {
+    expectLocation: '北京',
+    expectLocations: ['北京', '上海', '远程'],
+    expectSalary: '面议',
+    dream: '持续打磨有趣的产品，把工程体验做到极致。',
+    supplements: [
+      '活跃的开源贡献者，关注前端基础设施与可视化方向。',
+      '喜欢写技术博客，分享工程实践与学习笔记。'
+    ],
+    socialLinks: [
+      {
+        name: 'github',
+        text: 'GitHub',
+        icon: 'github.png',
+        url: `https://github.com/${DEMO_LOGIN}`
+      },
+      {
+        name: 'blog',
+        text: '个人博客',
+        icon: 'blog.png',
+        url: 'https://hacknical.com'
+      }
+    ]
+  },
   educationList: [],
   workList: [],
   projectList: []
@@ -141,6 +243,8 @@ const demoResumeInfo = {
   login: DEMO_LOGIN,
   openShare: true,
   simplifyUrl: DEMO_LOGIN,
+  resumeHash: 'demo-hash',
+  template: 'v1',
   githubSections: [
     { id: 'hotmap', enabled: true },
     { id: 'info', enabled: true },
@@ -172,7 +276,12 @@ const fixtures = {
     exact('/user', { success: true }, 'put'),
     exact('/user', { success: true, userId: DEMO_USER_ID }, 'post'),
     exact('/user/count', 1024),
-    exact('/resume', { resume: demoResumeContent, info: demoResumeInfo }),
+    exact('/resume', {
+      resume: demoResumeContent,
+      info: demoResumeInfo,
+      languages: ['JavaScript', 'TypeScript', 'Go'],
+      updated_at: new Date().toISOString()
+    }),
     exact('/resume', { success: true }, 'put'),
     exact('/resume/information', demoResumeInfo),
     exact('/resume/information', { success: true }, 'put'),
