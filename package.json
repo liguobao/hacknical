@@ -31,7 +31,7 @@
     "@babel/preset-react": "^7.24.0",
     "ajv": "^8.18.0",
     "babel-eslint": "^10.1.0",
-    "babel-loader": "^9.2.1",
+    "babel-loader": "^10.1.1",
     "cal-heatmap": "^3.6.2",
     "chart.js": "2.4.0",
     "classnames": "^2.2.5",
