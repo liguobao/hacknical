@@ -137,6 +137,7 @@ const demoResumeContent = {
       url: 'https://hacknical.com',
       startTime: '2022-03',
       endTime: '',
+      untilNow: true,
       position: 'Senior Frontend Engineer',
       projects: [
         {
@@ -244,7 +245,39 @@ const demoResumeInfo = {
   openShare: true,
   simplifyUrl: DEMO_LOGIN,
   resumeHash: 'demo-hash',
-  template: 'v1',
+  template: 'v3',
+  resumeSections: [
+    {
+      id: 'info',
+      enabled: true,
+      canbeDisabled: false,
+      canbeReorder: false
+    },
+    {
+      id: 'workExperiences',
+      enabled: true,
+      canbeDisabled: true,
+      canbeReorder: true
+    },
+    {
+      id: 'personalProjects',
+      enabled: true,
+      canbeDisabled: true,
+      canbeReorder: true
+    },
+    {
+      id: 'educations',
+      enabled: true,
+      canbeDisabled: true,
+      canbeReorder: true
+    },
+    {
+      id: 'others',
+      enabled: true,
+      canbeDisabled: true,
+      canbeReorder: true
+    }
+  ],
   githubSections: [
     { id: 'hotmap', enabled: true },
     { id: 'info', enabled: true },
@@ -255,7 +288,7 @@ const demoResumeInfo = {
     { id: 'contributed', enabled: true },
     { id: 'commits', enabled: true }
   ],
-  useGithub: true,
+  useGithub: false,
   url: DEMO_LOGIN,
   viewTimes: 12,
   downloadTimes: 3
