@@ -1,19 +1,19 @@
 
 import React from 'react'
 import { Loading } from 'light-ui'
-import { asyncComponent } from 'react-async-component'
+import asyncComponent from 'COMPONENTS/AsyncComponent'
 
 const ResumeViews = {
   v1: asyncComponent({
-    resolve: () => System.import('./v1'),
+    resolve: () => import('./v1').then(component => component.default || component),
     LoadingComponent: () => <Loading loading />
   }),
   v2: asyncComponent({
-    resolve: () => System.import('./v2'),
+    resolve: () => import('./v2').then(component => component.default || component),
     LoadingComponent: () => <Loading loading />
   }),
   v3: asyncComponent({
-    resolve: () => System.import('./v3'),
+    resolve: () => import('./v3').then(component => component.default || component),
     LoadingComponent: () => <Loading loading />
   })
 }

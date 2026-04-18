@@ -1,7 +1,7 @@
 
 import React from 'react'
 import { Loading } from 'light-ui'
-import { asyncComponent } from 'react-async-component'
+import asyncComponent from 'COMPONENTS/AsyncComponent'
 import ResumeWrapper from 'SHARED/components/ResumeWrapper'
 import styles from './shared/common.css'
 
@@ -12,7 +12,8 @@ const ResumeComponentLoader = (props) => {
   const platform = `${device[0].toUpperCase()}${device.slice(1)}`
 
   const ResumeView = asyncComponent({
-    resolve: () => System.import(`./${platform}/${shareInfo.template.toLowerCase()}`),
+    resolve: () => import(`./${platform}/${shareInfo.template.toLowerCase()}`)
+      .then(component => component.default || component),
     LoadingComponent: () => <Loading loading />
   })
 
