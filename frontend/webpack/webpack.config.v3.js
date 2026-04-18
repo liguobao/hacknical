@@ -30,7 +30,8 @@ const createCssLoader = ({ modules = false, lightUi = false }) => {
 
   if (modules) {
     cssLoaderOptions.modules = {
-      localIdentName: '[name]__[local]___[hash:base64:5]'
+      localIdentName: '[name]__[local]___[hash:base64:5]',
+      exportLocalsConvention: 'as-is'
     }
   }
 
