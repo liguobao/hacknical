@@ -7,7 +7,7 @@ export default (store, options) => {
   const { login, device } = options
 
   const SettingComponent = asyncComponent(
-    () => System.import(`./Components/${device[0].toUpperCase()}${device.slice(1).toLowerCase()}`)
+    () => import(`./Components/${device[0].toUpperCase()}${device.slice(1).toLowerCase()}`)
       .then((component) => {
         injectReducer(store, { key: 'setting', reducer })
         return component.default
