@@ -1,7 +1,7 @@
 
 import React from 'react'
 import { connect } from 'react-redux'
-import { renderRoutes } from 'react-router-config'
+import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import asyncComponent from 'COMPONENTS/AsyncComponent'
 import AppAction from './redux/actions'
 
@@ -21,25 +21,27 @@ class App extends React.Component {
     // https://github.com/ReactTraining/react-router/issues/3854
     const {
       app,
-      history
+      navigate,
+      location
     } = this.props
     const { login, activeTab } = app
-    history.replace(`/${login}/${activeTab}`)
+    const target = `/${login}/${activeTab}`
+    if (location.pathname !== target) {
+      navigate(target, { replace: true })
+    }
   }
 
   render() {
     const {
       app,
-      route,
       location,
       changeActiveTab
     } = this.props
     const dashboardType = app.isMobile ? 'mobile' : 'desktop'
     const Dashboard = dashboard[dashboardType]
-    const routes = renderRoutes(route.routes)
     return (
       <Dashboard
-        routes={routes}
+        routes={<Outlet />}
         location={location}
         changeActiveTab={changeActiveTab}
         {...app}
@@ -58,4 +60,12 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+const AppConnected = connect(mapStateToProps, mapDispatchToProps)(App)
+
+const AppWithRouter = (props) => {
+  const navigate = useNavigate()
+  const location = useLocation()
+  return <AppConnected {...props} navigate={navigate} location={location} />
+}
+
+export default AppWithRouter

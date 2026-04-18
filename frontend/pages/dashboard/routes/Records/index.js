@@ -4,7 +4,7 @@ import reducer from './redux/reducers'
 import asyncComponent from 'COMPONENTS/AsyncComponent'
 
 export default (store, options) => {
-  const { login, device } = options
+  const { device } = options
 
   const RecordsComponent = asyncComponent(
     () => import(`./Components/${device[0].toUpperCase()}${device.slice(1).toLowerCase()}`)
@@ -14,7 +14,7 @@ export default (store, options) => {
       })
   )
   return {
-    path: `/${login}/records`,
+    path: 'records',
     component: RecordsComponent
   }
 }

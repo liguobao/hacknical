@@ -39,8 +39,7 @@ class Menus extends MenuWrapper {
       <NavLink
         key={index}
         to={`/${login}/${tab.id}`}
-        className={styles.menu}
-        activeClassName={styles.menuActive}
+        className={({ isActive }) => cx(styles.menu, isActive && styles.menuActive)}
         onClick={() => changeActiveTab(tab.id)}
       >
         <Icon icon={tab.icon} />

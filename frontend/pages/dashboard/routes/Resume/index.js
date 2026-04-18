@@ -4,7 +4,7 @@ import reducer from './redux/reducers'
 import asyncComponent from 'COMPONENTS/AsyncComponent'
 
 export default (store, options) => {
-  const { login, device } = options
+  const { device } = options
 
   const resumeComponent = {
     desktop: asyncComponent(
@@ -22,7 +22,7 @@ export default (store, options) => {
 
   const ResumeComponent = resumeComponent[device]
   return {
-    path: `/${login}/archive`,
+    path: 'archive',
     component: ResumeComponent
   }
 }

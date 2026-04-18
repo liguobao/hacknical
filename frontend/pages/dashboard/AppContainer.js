@@ -1,8 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { renderRoutes } from 'react-router-config'
 import { Provider } from 'react-redux'
-import { Router } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { removeDOM } from 'UTILS/helper'
 import * as Sentry from '@sentry/browser'
 
@@ -34,21 +33,38 @@ class AppContainer extends React.Component {
     })
   }
 
+  renderRouteTree() {
+    const { routes } = this.props
+    const { path, component: Layout, routes: children } = routes
+    return (
+      <Routes>
+        <Route path={path} element={<Layout />}>
+          {children.map(child => (
+            <Route
+              key={child.path}
+              path={child.path}
+              element={<child.component />}
+            />
+          ))}
+        </Route>
+      </Routes>
+    )
+  }
+
   render() {
-    const { history, routes, store } = this.props
+    const { store } = this.props
     return (
       <Provider store={store}>
-        <Router history={history}>
-          {renderRoutes(routes)}
-        </Router>
+        <BrowserRouter>
+          {this.renderRouteTree()}
+        </BrowserRouter>
       </Provider>
     )
   }
 }
 
 AppContainer.propTypes = {
-  history: PropTypes.object.isRequired,
-  routes: PropTypes.array.isRequired,
+  routes: PropTypes.object.isRequired,
   store: PropTypes.object.isRequired
 }
 

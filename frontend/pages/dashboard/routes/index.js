@@ -31,7 +31,8 @@ export const createRoutes = (store, props) => {
     isMobile,
     dashboardRoute
   }
-  return [{
+  return {
+    path: `/${login}`,
     component: App,
     routes: [
       Records(store, options),
@@ -39,7 +40,7 @@ export const createRoutes = (store, props) => {
       Github(store, options),
       Setting(store, options)
     ]
-  }]
+  }
 }
 
 export default createRoutes
