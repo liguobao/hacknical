@@ -3,7 +3,7 @@ import 'STYLES/fonts-hack.css'
 import renderApp from 'PAGES/error'
 
 $(() => {
-  $(document).bind('contextmenu', () => false)
+  $(document).on('contextmenu', () => false)
 
   renderApp('error', {
     wordLines: [

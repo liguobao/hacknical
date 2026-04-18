@@ -12,7 +12,7 @@ class Nav extends React.PureComponent {
       const navTop = 200
       const $document = $(document)
 
-      $(window).scroll(() => {
+      $(window).on('scroll', () => {
         const currentTop = $document.scrollTop()
         if (currentTop + 80 + 65 >= navTop) {
           const navLeft = $navigation.offset().left
