@@ -114,7 +114,7 @@
     "moment": "^2.17.0",
     "mq-utils": "^0.1.0",
     "nunjucks": "^3.0.1",
-    "puppeteer-core": "^13.7.0",
+    "puppeteer-core": "^24.41.0",
     "rc-times": "^0.0.7",
     "react-cropper": "^2.3.3",
     "react-image": "^4.1.0",
