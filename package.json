@@ -101,7 +101,7 @@
     "iconv-lite": "^0.7.2",
     "ioredis": "^5.10.1",
     "keyboardjs": "^2.4.1",
-    "koa": "^2.4.1",
+    "koa": "^3.2.0",
     "koa-bodyparser": "^4.2.0",
     "koa-csrf": "^5.0.1",
     "koa-locales": "^1.8.0",

@@ -58,7 +58,7 @@ app.use(cors())
 // bodyparser
 app.use(bodyParser({
   onerror: (err, ctx) => {
-    ctx.throw('body parse error', 422)
+    ctx.throw(422, 'body parse error')
   }
 }))
 
