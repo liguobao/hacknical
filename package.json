@@ -80,7 +80,7 @@
     "redux-thunk": "^3.1.0",
     "scrollreveal": "^4.0.9",
     "slick-carousel": "^1.6.0",
-    "validator": "^6.2.0",
+    "validator": "^13.15.35",
     "webpack": "^5.91.0",
     "webpack-cli": "^7.0.2"
   },
@@ -112,7 +112,7 @@
     "light-ui": "^1.5.10",
     "log4js": "^6.9.1",
     "moment": "^2.17.0",
-    "mq-utils": "^0.1.0",
+    "mq-utils": "^0.2.0",
     "nunjucks": "^3.0.1",
     "puppeteer-core": "^13.7.0",
     "rc-times": "^0.0.7",
