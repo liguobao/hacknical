@@ -2,6 +2,7 @@
   "port": "4000",
   "appKey": "hacknical-key",
   "appName": "hacknical-local",
+  "mock": true,
   "services": {
     "redis": {
       "host": "127.0.0.1",

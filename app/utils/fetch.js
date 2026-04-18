@@ -4,8 +4,10 @@ import logger from './logger'
 import getSignature from './signature'
 import { REQUEST_JSON_METHODS } from './constant'
 import NewError from './error'
+import { mockRequest, MOCK_MISS } from '../services/mock'
 
 const name = config.get('appName')
+const mockEnabled = config.has('mock') && config.get('mock')
 
 const buildQueryString = (qs) => {
   if (!qs) return ''
@@ -133,6 +135,15 @@ const fetchData = async (options) => {
 }
 
 const fetchWithRetry = async (options, timeouts = [2000]) => {
+  if (mockEnabled) {
+    const mocked = mockRequest(options)
+    if (mocked !== MOCK_MISS) {
+      logger.info(`[FETCH:MOCK] ${options.source} ${options.method || 'GET'} ${options.url}`)
+      return mocked
+    }
+    logger.info(`[FETCH:MOCK-MISS] ${options.source} ${options.method || 'GET'} ${options.url}`)
+  }
+
   verify(options)
 
   let err = null

@@ -90,6 +90,19 @@ const CONFIG = {
 }
 app.use(session(CONFIG, app))
 
+// mock session (localdev only) - auto-logs-in as demo user
+if (config.has('mock') && config.get('mock')) {
+  app.use(async (ctx, next) => {
+    if (!ctx.session.githubLogin) {
+      ctx.session.githubLogin = 'demo'
+      ctx.session.userId = 'demo-user-id'
+      ctx.session.githubToken = 'demo-token'
+      ctx.session.githubAvator = 'https://avatars.githubusercontent.com/u/1?v=4'
+    }
+    await next()
+  })
+}
+
 // cache
 app.use(redisMiddleware())
 // mq
