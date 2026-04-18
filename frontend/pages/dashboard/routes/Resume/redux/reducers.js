@@ -51,16 +51,19 @@ const reducers = handleActions({
   // initial
   INITIAL_RESUME(state, action) {
     const {
-      info,
-      others,
-      educations,
-      workExperiences,
-      personalProjects,
+      info = {},
+      others = {},
+      educations = [],
+      workExperiences = [],
+      personalProjects = [],
       customModules = [],
     } = action.payload
 
     const { shareInfo } = state
     const { resumeSections } = shareInfo
+    const socialLinks = validateSocialLinks(
+      others.socialLinks || state.others.socialLinks || []
+    )
 
     return ({
       ...state,
@@ -70,7 +73,7 @@ const reducers = handleActions({
       educations: [...educations].sort(sortByDate),
       workExperiences: workExperiences.map((workExperience, i) => objectAssign({}, workExperience, {
         id: `workExperiences.${i + 1}`,
-        projects: workExperience.projects.map((project, j) => objectAssign({}, project, {
+        projects: (workExperience.projects || []).map((project, j) => objectAssign({}, project, {
           id: `workExperiences.${i + 1}.projects.${j + 1}`
         }))
       })).sort(sortByDate),
@@ -79,7 +82,7 @@ const reducers = handleActions({
           id: `personalProjects.${i + 1}`
         })),
       others: objectAssign({}, state.others, objectAssign({}, others, {
-        socialLinks: [...validateSocialLinks(others.socialLinks)]
+        socialLinks: [...socialLinks]
       })),
       customModules: [...customModules],
       shareInfo: objectAssign({}, shareInfo, {

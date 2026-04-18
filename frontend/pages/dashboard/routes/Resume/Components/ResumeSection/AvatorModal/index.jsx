@@ -139,7 +139,8 @@ class AvatorModal extends React.Component {
     }
   }
 
-  onCropperInitialized() {
+  onCropperInitialized(cropper) {
+    this.cropper = cropper
     this.setState({
       initializing: false
     })
@@ -178,13 +179,12 @@ class AvatorModal extends React.Component {
               </div>
             )}
             <Cropper
-              ref={ref => (this.cropper = ref)}
               src={imageUrl}
               style={{ height: 400, width: 400 }}
               preview='.image-preview'
               aspectRatio={1}
               guides={true}
-              ready={this.onCropperInitialized}
+              onInitialized={this.onCropperInitialized}
             />
             &nbsp;&nbsp;&nbsp;&nbsp;
             <div className={styles.imagePreviewContainer}>
