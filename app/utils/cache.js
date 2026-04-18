@@ -1,8 +1,8 @@
 
-import cacheManager from 'cache-manager'
+import { createCache } from 'cache-manager'
 import logger from './logger'
 
-const cache = cacheManager.caching({ store: 'memory', max: 3000 })
+const cache = createCache()
 
 const getCacheKey = (args) => {
   let cacheKey = ''
@@ -21,7 +21,8 @@ const getCacheKey = (args) => {
 }
 
 function wrapFn(fn, prefix = 'cache', options) {
-  const finallyOptions = options || {}
+  const ttlSeconds = (options && options.ttl) || 0
+  const ttlMs = ttlSeconds * 1000
 
   return (...args) => {
     let hitCache = true
@@ -31,7 +32,7 @@ function wrapFn(fn, prefix = 'cache', options) {
     return cache.wrap(cacheKey, () => {
       hitCache = false
       return fn(...args)
-    }, finallyOptions).then((data) => {
+    }, ttlMs || undefined).then((data) => {
       if (hitCache) {
         logger.info(`[FUNC-CACHE:GET][${cacheKey}]`)
       } else {
