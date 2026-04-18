@@ -17,11 +17,10 @@ class AppContainer extends React.Component {
     })
 
     if (window.LogRocket) {
-      Sentry.configureScope((scope) => {
-        scope.addEventProcessor(async (event) => {
-          event.extra.sessionURL = window.LogRocket.sessionURL
-          return event
-        })
+      Sentry.getCurrentScope().addEventProcessor(async (event) => {
+        event.extra = event.extra || {}
+        event.extra.sessionURL = window.LogRocket.sessionURL
+        return event
       })
     }
   }
