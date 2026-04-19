@@ -312,7 +312,7 @@ const fixtures = {
     exact('/resume', {
       resume: demoResumeContent,
       info: demoResumeInfo,
-      languages: ['JavaScript', 'TypeScript', 'Go'],
+      languages: [],
       updated_at: new Date().toISOString()
     }),
     exact('/resume', { success: true }, 'put'),
