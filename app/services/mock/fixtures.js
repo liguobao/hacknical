@@ -48,6 +48,7 @@ const makeRepo = (name, language, stars, forks) => ({
   description: `${name} is a demo repository`,
   fork: false,
   language,
+  languages: { [language]: Math.max(stars, 1) * 1000 },
   stargazers_count: stars,
   forks_count: forks,
   watchers_count: stars,
@@ -102,13 +103,44 @@ const demoLanguages = {
   HTML: 5000
 }
 
+const pad = (n) => (n < 10 ? `0${n}` : `${n}`)
+const formatDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+const seedRand = (seed) => {
+  let s = seed
+  return () => {
+    s = (s * 9301 + 49297) % 233280
+    return s / 233280
+  }
+}
+const buildHotmapDatas = () => {
+  const end = new Date()
+  end.setHours(0, 0, 0, 0)
+  const start = new Date(end)
+  start.setDate(start.getDate() - 364)
+  const rand = seedRand(20260419)
+  const datas = []
+  for (let i = 0; i < 365; i += 1) {
+    const d = new Date(start)
+    d.setDate(start.getDate() + i)
+    const weekday = d.getDay()
+    const burst = rand() < 0.08 ? 6 : 0
+    const weekend = weekday === 0 || weekday === 6
+    const base = weekend ? rand() * 2 : rand() * 4
+    const data = Math.floor(base + burst)
+    const level = data === 0 ? 0 : Math.min(4, Math.max(1, Math.ceil(data / 2)))
+    datas.push({ date: formatDate(d), data, level })
+  }
+  return datas
+}
+
+const demoHotmapDatas = buildHotmapDatas()
 const demoHotmap = {
-  datas: [],
-  start: '2024-01-01',
-  end: '2025-01-01',
+  datas: demoHotmapDatas,
+  start: demoHotmapDatas[0].date,
+  end: demoHotmapDatas[demoHotmapDatas.length - 1].date,
   streak: 5,
-  total: 365,
-  max: 8,
+  total: demoHotmapDatas.reduce((sum, d) => sum + d.data, 0),
+  max: demoHotmapDatas.reduce((m, d) => Math.max(m, d.data), 0),
   longestStreak: 24
 }
 
