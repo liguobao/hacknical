@@ -3,7 +3,7 @@ import React from "react"
 import cx from 'classnames'
 import PropTypes from 'prop-types'
 import styles from './dad.css'
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 
 class DragAndDrop extends React.Component {
   constructor(props) {
