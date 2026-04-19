@@ -1,7 +1,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import Chart from 'chart.js'
+import Chart from 'chart.js/auto'
 import cx from 'classnames'
 import objectAssign from 'UTILS/object-assign'
 import { Tipso, Label } from 'light-ui'
@@ -80,32 +80,34 @@ class ContributionChart extends React.Component {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        title: {
-          display: false,
-          text: ''
-        },
-        legend: {
-          display: false,
+        plugins: {
+          title: {
+            display: false,
+            text: ''
+          },
+          legend: {
+            display: false,
+          },
         },
         scales: {
-          xAxes: [{
+          x: {
             display: false,
-            gridLines: {
+            grid: {
               display: false
             },
             ticks: {
               beginAtZero: true
             }
-          }],
-          yAxes: [{
+          },
+          y: {
             display: false,
-            gridLines: {
+            grid: {
               display: false
             },
             ticks: {
               beginAtZero: true
             }
-          }],
+          },
         }
       }
     })

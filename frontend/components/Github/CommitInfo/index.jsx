@@ -1,7 +1,7 @@
 
 import React from 'react'
 import cx from 'classnames'
-import Chart from 'chart.js'
+import Chart from 'chart.js/auto'
 import objectAssign from 'UTILS/object-assign'
 import { Loading, InfoCard, CardGroup } from 'light-ui'
 
@@ -169,23 +169,25 @@ class CommitInfo extends React.Component {
       },
       options: {
         scales: {
-          xAxes: [{
-            gridLines: {
+          x: {
+            grid: {
               display: false
             }
-          }],
-          yAxes: [{
-            gridLines: {
+          },
+          y: {
+            grid: {
               display: false
             },
             ticks: {
               beginAtZero: true
             }
-          }],
+          },
         },
-        tooltips: {
-          callbacks: {
-            label: item => `${item.yLabel} commits`
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: item => `${item.yLabel} commits`
+            }
           }
         }
       }

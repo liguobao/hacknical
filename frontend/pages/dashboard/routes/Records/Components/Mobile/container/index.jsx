@@ -1,5 +1,5 @@
 import React from 'react'
-import Chart from 'chart.js'
+import Chart from 'chart.js/auto'
 import cx from 'classnames'
 import deepcopy from 'deepcopy'
 import { Loading } from 'light-ui'
@@ -109,36 +109,38 @@ class MobileRecords extends React.Component {
         datasets: [objectAssign({}, LINE_CONFIG, datasetsConfig)]
       },
       options: {
-        title: {
-          display: true,
-          text: analysisTexts.hourlyViewChartTitle
-        },
-        legend: {
-          display: false,
+        plugins: {
+          title: {
+            display: true,
+            text: analysisTexts.hourlyViewChartTitle
+          },
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            callbacks: {
+              title: item => item[0].xLabel,
+              label: item => `${item.yLabel} PV`
+            }
+          }
         },
         scales: {
-          xAxes: [{
+          x: {
             display: false,
-            gridLines: {
+            grid: {
               display: false
             }
-          }],
-          yAxes: [{
+          },
+          y: {
             display: false,
-            gridLines: {
+            grid: {
               display: false
             },
             ticks: {
               beginAtZero: true,
             }
-          }],
+          },
         },
-        tooltips: {
-          callbacks: {
-            title: item => item[0].xLabel,
-            label: item => `${item.yLabel} PV`
-          }
-        }
       }
     })
   }
@@ -163,7 +165,7 @@ class MobileRecords extends React.Component {
     const radarConfig = deepcopy(RADAR_CONFIG)
     radarConfig.data.labels = labels
     radarConfig.data.datasets[0].data = datas
-    radarConfig.options.title.text = analysisTexts.platformChartTitle
+    radarConfig.options.plugins.title.text = analysisTexts.platformChartTitle
 
     this.viewDevicesChart = new Chart(this.viewDevices, radarConfig)
   }
@@ -176,7 +178,7 @@ class MobileRecords extends React.Component {
     const radarConfig = deepcopy(RADAR_CONFIG)
     radarConfig.data.labels = labels
     radarConfig.data.datasets[0].data = datas
-    radarConfig.options.title.text = analysisTexts.browserChartTitle
+    radarConfig.options.plugins.title.text = analysisTexts.browserChartTitle
 
     this.viewSourcesChart = new Chart(this.viewSources, radarConfig)
   }

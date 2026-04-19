@@ -2,7 +2,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import Chart from 'chart.js'
+import Chart from 'chart.js/auto'
 import cx from 'classnames'
 import Headroom from 'headroom.js'
 import objectAssign from 'UTILS/object-assign'
@@ -142,26 +142,28 @@ class GitHubMobileContent extends React.Component {
         })]
       },
       options: {
-        title: {
-          display: false,
-        },
-        legend: {
-          display: false,
+        plugins: {
+          title: {
+            display: false,
+          },
+          legend: {
+            display: false,
+          },
         },
         scales: {
-          xAxes: [{
+          x: {
             display: false,
-            gridLines: {
+            grid: {
               display: false
             }
-          }],
-          yAxes: [{
+          },
+          y: {
             display: false,
-            gridLines: {
+            grid: {
               display: false
             },
             ticks: { beginAtZero: true, }
-          }]
+          }
         }
       }
     })
@@ -190,12 +192,14 @@ class GitHubMobileContent extends React.Component {
         datasets: [chart.radar(skills)]
       },
       options: {
-        title: {
-          display: true,
-          text: githubTexts.languages.starChart.title
-        },
-        legend: { display: false, },
-        tooltips: { enabled: false, }
+        plugins: {
+          title: {
+            display: true,
+            text: githubTexts.languages.starChart.title
+          },
+          legend: { display: false, },
+          tooltip: { enabled: false, }
+        }
       }
     })
   }
@@ -219,26 +223,28 @@ class GitHubMobileContent extends React.Component {
         labels: github.getReposNames(renderedRepos)
       },
       options: {
-        title: {
-          display: false,
-          text: ''
+        plugins: {
+          title: {
+            display: false,
+            text: ''
+          },
         },
         scales: {
-          xAxes: [{
+          x: {
             display: false,
-            gridLines: {
+            grid: {
               display: false
             }
-          }],
-          yAxes: [{
+          },
+          y: {
             display: false,
-            gridLines: {
+            grid: {
               display: false
             },
             ticks: {
               beginAtZero: true
             }
-          }]
+          }
         }
       }
     })

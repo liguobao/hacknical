@@ -1,6 +1,6 @@
 import React from 'react'
 import deepcopy from 'deepcopy'
-import Chart from 'chart.js'
+import Chart from 'chart.js/auto'
 import styles from '../styles/statistic.css'
 import githubStyles from '../styles/github.css'
 import cardStyles from '../styles/info_card.css'
@@ -51,7 +51,7 @@ class Statistic extends React.Component {
     const radarConfig = deepcopy(RADAR_CONFIG)
     radarConfig.data.labels = labels
     radarConfig.data.datasets[0].data = datas
-    radarConfig.options.title.text = title
+    radarConfig.options.plugins.title.text = title
 
     this[pointTo] = new Chart(ref, radarConfig)
   }

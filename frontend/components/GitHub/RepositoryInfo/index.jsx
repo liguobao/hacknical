@@ -1,6 +1,6 @@
 
 import React from 'react'
-import Chart from 'chart.js'
+import Chart from 'chart.js/auto'
 import cx from 'classnames'
 import { Loading, InfoCard, CardGroup } from 'light-ui'
 
@@ -106,24 +106,26 @@ class RepositoryInfo extends React.Component {
         labels: github.getReposNames(ownedRepositories)
       },
       options: {
-        title: {
-          display: true,
-          text: githubTexts.chartTitle
+        plugins: {
+          title: {
+            display: true,
+            text: githubTexts.chartTitle
+          },
         },
         scales: {
-          xAxes: [{
-            gridLines: {
+          x: {
+            grid: {
               display: false
             }
-          }],
-          yAxes: [{
-            gridLines: {
+          },
+          y: {
+            grid: {
               display: false
             },
             ticks: {
               beginAtZero: true
             }
-          }]
+          }
         },
       }
     })

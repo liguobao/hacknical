@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
-import Chart from 'chart.js'
+import Chart from 'chart.js/auto'
 import Clipboard from 'clipboard'
 import deepcopy from 'deepcopy'
 import {
@@ -214,7 +214,7 @@ class ShareRecords extends React.Component {
     const radarConfig = deepcopy(RADAR_CONFIG)
     radarConfig.data.labels = labels
     radarConfig.data.datasets[0].data = datas
-    radarConfig.options.title.text = recordsTexts.platformChartTitle
+    radarConfig.options.plugins.title.text = recordsTexts.platformChartTitle
 
     this.viewDevicesChart = new Chart(this.viewDevices, radarConfig)
   }
@@ -227,7 +227,7 @@ class ShareRecords extends React.Component {
     const radarConfig = deepcopy(RADAR_CONFIG)
     radarConfig.data.labels = labels
     radarConfig.data.datasets[0].data = datas
-    radarConfig.options.title.text = recordsTexts.browserChartTitle
+    radarConfig.options.plugins.title.text = recordsTexts.browserChartTitle
 
     this.viewSourcesChart = new Chart(this.viewSources, radarConfig)
   }

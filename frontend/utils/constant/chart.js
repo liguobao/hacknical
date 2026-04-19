@@ -1,8 +1,8 @@
 
-import Chart from 'chart.js'
+import Chart from 'chart.js/auto'
 import { GREEN_COLORS } from './index'
 
-Chart.defaults.global.defaultFontFamily = '"PingFangSC-Light", "PingFang SC", "Helvetica Neue", "Microsoft YaHei", monospace, sans-serif'
+Chart.defaults.font.family = '"PingFangSC-Light", "PingFang SC", "Helvetica Neue", "Microsoft YaHei", monospace, sans-serif'
 
 export const RADAR_CONFIG = {
   type: 'radar',
@@ -22,15 +22,17 @@ export const RADAR_CONFIG = {
     }]
   },
   options: {
-    title: {
-      display: true,
-      text: '',
-    },
-    legend: {
-      display: false,
-    },
-    tooltips: {
-    },
+    plugins: {
+      title: {
+        display: true,
+        text: '',
+      },
+      legend: {
+        display: false,
+      },
+      tooltip: {
+      },
+    }
   }
 }
 
@@ -59,24 +61,26 @@ export const LINE_CONFIG = {
 
 export const DOUGHNUT_CONFIG = {
   responsive: true,
-  title: {
-    display: true,
-  },
-  legend: {
-    display: false,
+  plugins: {
+    title: {
+      display: true,
+    },
+    legend: {
+      display: false,
+    },
   },
   scales: {
-    xAxes: [{
+    x: {
       display: false,
-      gridLines: {
+      grid: {
         display: false
       }
-    }],
-    yAxes: [{
+    },
+    y: {
       display: false,
-      gridLines: {
+      grid: {
         display: false
       }
-    }],
+    },
   }
 }
