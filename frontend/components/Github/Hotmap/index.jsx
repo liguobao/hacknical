@@ -2,7 +2,7 @@
 
 import React from 'react'
 import cx from 'classnames'
-import CalHeatMap from 'cal-heatmap'
+import CalHeatmap from 'cal-heatmap'
 import 'cal-heatmap/cal-heatmap.css'
 import { Loading, InfoCard, CardGroup } from 'light-ui'
 import styles from '../styles/github.css'
@@ -12,47 +12,142 @@ import dateHelper from 'UTILS/date'
 import Icon from 'COMPONENTS/Icon'
 
 const githubTexts = locales('github.sections.hotmap')
+const HOTMAP_COLORS = ['#ededed', '#dae289', '#8cc665', '#44a340', '#3b6427']
+
+const normalizeHotmapData = (datas = {}) => Object.keys(datas).map(timestamp => ({
+  date: Number(timestamp) * 1000,
+  value: datas[timestamp]
+}))
+
+const getScaleThresholds = (levelRanges = [], hotmapData = []) => {
+  const thresholdCount = HOTMAP_COLORS.length - 1
+  const normalizedRanges = levelRanges
+    .slice(1)
+    .map(level => Number(level))
+    .filter(level => Number.isFinite(level) && level > 0)
+    .sort((left, right) => left - right)
+
+  if (normalizedRanges.length >= thresholdCount) {
+    return normalizedRanges.slice(0, thresholdCount)
+  }
+
+  const maxValue = Math.max(
+    thresholdCount,
+    ...hotmapData.map(item => Number(item.value) || 0)
+  )
+
+  return Array.from({ length: thresholdCount }, (_, index) =>
+    Math.max(index + 1, Math.ceil(((index + 1) * maxValue) / thresholdCount))
+  )
+}
 
 class Hotmap extends React.Component {
   constructor(props) {
     super(props)
-    this.githubCalendar = false
+    this.githubCalendar = null
+    this.hotmapRoot = null
+    this.handleNext = this.handleNext.bind(this)
+    this.handlePrevious = this.handlePrevious.bind(this)
+    this.setHotmapRoot = this.setHotmapRoot.bind(this)
   }
 
-  componentDidUpdate() {
-    if (!this.githubCalendar && $('#cal-heatmap')[0]) {
+  componentDidMount() {
+    if (this.props.loaded) {
       this.renderHotmap()
     }
   }
 
-  renderHotmap() {
+  componentDidUpdate(preProps) {
     const { loaded, data } = this.props
-    if (!loaded) return
 
-    this.githubCalendar = true
+    if (
+      loaded
+      && (!this.githubCalendar || loaded !== preProps.loaded || data !== preProps.data)
+    ) {
+      this.renderHotmap()
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.githubCalendar) {
+      this.githubCalendar.destroy()
+      this.githubCalendar = null
+    }
+  }
+
+  setHotmapRoot(ref) {
+    this.hotmapRoot = ref
+  }
+
+  handlePrevious() {
+    if (this.githubCalendar) {
+      this.githubCalendar.previous()
+    }
+  }
+
+  handleNext() {
+    if (this.githubCalendar) {
+      this.githubCalendar.next()
+    }
+  }
+
+  async renderHotmap() {
+    const { loaded, data } = this.props
+    if (!loaded || !this.hotmapRoot) return
+
     const local = formatLocale()
-    const cal = new CalHeatMap()
     const {
-      datas,
-      levelRanges
+      datas = {},
+      levelRanges = []
     } = (data || {})
+    const hotmapData = normalizeHotmapData(datas)
+    const thresholds = getScaleThresholds(levelRanges, hotmapData)
+    const startTimestamp = hotmapData.length
+      ? Math.min(...hotmapData.map(item => item.date))
+      : new Date(dateHelper.date.beforeYears(1)).getTime()
+    const endTimestamp = hotmapData.length
+      ? Math.max(...hotmapData.map(item => item.date))
+      : Date.now()
 
-    cal.init({
-      domain: 'month',
-      start: new Date(dateHelper.date.beforeYears(1)),
-      data: datas,
-      weekStartOnMonday: local === 'zh-CN',
-      subDomain: 'day',
+    if (this.githubCalendar) {
+      await this.githubCalendar.destroy()
+    }
+
+    const calendar = new CalHeatmap()
+    this.githubCalendar = calendar
+
+    await calendar.paint({
+      itemSelector: this.hotmapRoot,
       range: 13,
-      displayLegend: false,
-      previousSelector: '#hotmap-left',
-      nextSelector: '#hotmap-right',
-      legend: levelRanges,
-      domainLabelFormat: '%Y-%m',
-      legendColors: {
-        min: '#dae289',
-        max: '#3b6427',
-        empty: '#ededed'
+      domain: {
+        type: 'month',
+        gutter: 4
+      },
+      subDomain: {
+        type: 'ghDay',
+        width: 11,
+        height: 11,
+        gutter: 4,
+        radius: 2
+      },
+      date: {
+        start: new Date(startTimestamp),
+        min: new Date(startTimestamp),
+        max: new Date(endTimestamp),
+        locale: local === 'zh-CN' ? { weekStart: 1 } : 'en'
+      },
+      data: {
+        source: hotmapData,
+        x: 'date',
+        y: 'value',
+        defaultValue: 0
+      },
+      scale: {
+        color: {
+          type: 'threshold',
+          range: HOTMAP_COLORS,
+          domain: thresholds
+        }
       }
     })
   }
@@ -139,12 +234,20 @@ class Hotmap extends React.Component {
         )}
       >
         <Loading className={styles.loading} loading={!loaded} />
-        <div id="cal-heatmap" className={styles.githubHotmap} />
+        <div ref={this.setHotmapRoot} className={styles.githubHotmap} />
         <div className={styles.hotmapControllers}>
-          <div className={styles.hotmapController} id="hotmap-left">
+          <div
+            className={styles.hotmapController}
+            id="hotmap-left"
+            onClick={this.handlePrevious}
+          >
             <Icon icon="angle-left" />
           </div>
-          <div className={styles.hotmapController} id="hotmap-right">
+          <div
+            className={styles.hotmapController}
+            id="hotmap-right"
+            onClick={this.handleNext}
+          >
             <Icon icon="angle-right" />
           </div>
         </div>
@@ -163,7 +266,7 @@ Hotmap.defaultProps = {
     start: '',
     total: '',
     streak: '',
-    datas: [],
+    datas: {},
     levelRanges: []
   }
 }
