@@ -44,7 +44,7 @@ const BASE_STOCK_CONFIG = {
   },
   title: { text: '' },
   scrollbar: {
-    enabled: true,
+    enabled: false,
     barBackgroundColor: 'transparent',
     barBorderColor: 'transparent',
     buttonArrowColor: 'transparent',
@@ -52,8 +52,7 @@ const BASE_STOCK_CONFIG = {
     buttonBorderColor: 'transparent',
     rifleColor: 'transparent',
     trackBackgroundColor: 'transparent',
-    trackBorderColor: 'transparent',
-    height: 0
+    trackBorderColor: 'transparent'
   },
   xAxis: [{
     categories: [],
