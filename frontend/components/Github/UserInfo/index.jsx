@@ -17,7 +17,7 @@ const UserInfo = (props) => {
     <div className={cx(styles.info_card, className)}>
       <div className={styles.info_header}>
         <div className={styles.info_avator}>
-          <img src={data.avatar_url} role="presentation" />
+          <img src={data.avatar_url || null} role="presentation" />
         </div>
         <div className={styles.info_user}>
           <a

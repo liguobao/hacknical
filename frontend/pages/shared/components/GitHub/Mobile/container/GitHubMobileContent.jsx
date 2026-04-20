@@ -384,7 +384,7 @@ class GitHubMobileContent extends React.Component {
     return (
       <div className={styles.notAdmin}>
         <div className={styles.shareHeader}>
-          <img src={user['avatar_url']} /><br/>
+          <img src={user['avatar_url'] || null} alt="" /><br/>
           <span>
             {user.name}
           </span>

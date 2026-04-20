@@ -137,8 +137,7 @@ module.exports = {
       PAGES: path.join(PATH.SOURCE_PATH, 'pages'),
       API: path.join(PATH.SOURCE_PATH, 'api'),
       SHARED: path.join(PATH.SOURCE_PATH, 'pages/shared'),
-      LOCALES: path.join(PATH.SOURCE_PATH, 'utils/locales'),
-      'react-dom$': path.join(PATH.SOURCE_PATH, 'vendor/shims/react-dom-shim.js')
+      LOCALES: path.join(PATH.SOURCE_PATH, 'utils/locales')
     }
   },
   optimization: {

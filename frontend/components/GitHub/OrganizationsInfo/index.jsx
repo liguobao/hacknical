@@ -107,7 +107,7 @@ class OrganizationsInfo extends React.Component {
               className={itemClass}
               onClick={() => this.changeAcitveOrganization(index)}
             >
-              <img src={avatar_url} alt="org-avatar" />
+              <img src={avatar_url || null} alt="org-avatar" />
               <span>{name || login}</span>
             </div>
           </div>

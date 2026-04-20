@@ -2,13 +2,19 @@
 import { combineReducers } from 'redux'
 
 const initialReducers = {}
+const emptyReducer = (state = {}) => state
 
-export const makeRootReducer = (asyncReducers) => {
-  const reducer = combineReducers({
+export const makeRootReducer = (asyncReducers = {}) => {
+  const reducers = {
     ...initialReducers,
     ...asyncReducers
-  })
-  return reducer
+  }
+
+  if (!Object.keys(reducers).length) {
+    return emptyReducer
+  }
+
+  return combineReducers(reducers)
 }
 
 export const injectReducer = (store, { key, reducer }) => {
