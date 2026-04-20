@@ -1,0 +1,72 @@
+diff --git a/node_modules/light-ui/lib/react/Slider/index.js b/node_modules/light-ui/lib/react/Slider/index.js
+index e0e9aca..7e9c53f 100644
+--- a/node_modules/light-ui/lib/react/Slider/index.js
++++ b/node_modules/light-ui/lib/react/Slider/index.js
+@@ -16,10 +16,6 @@ var _classnames = require('classnames');
+ 
+ var _classnames2 = _interopRequireDefault(_classnames);
+ 
+-var _reactDom = require('react-dom');
+-
+-var _reactDom2 = _interopRequireDefault(_reactDom);
+-
+ var _propTypes = require('prop-types');
+ 
+ var _propTypes2 = _interopRequireDefault(_propTypes);
+@@ -131,7 +127,7 @@ var Slider = function (_React$Component) {
+         if (!_this2.pathway) {
+           _this2.resetOrigin(count);
+         } else {
+-          var pathway = _reactDom2.default.findDOMNode(_this2.pathway).getBoundingClientRect();
++          var pathway = _this2.pathway.getBoundingClientRect();
+           var maxDis = pathway.width;
+           var maxLeft = pathway.left;
+           _this2.setState({ maxDis: maxDis, maxLeft: maxLeft });
+diff --git a/node_modules/light-ui/lib/react/Tipso/BaseTipso/index.js b/node_modules/light-ui/lib/react/Tipso/BaseTipso/index.js
+index 0f5da9c..1535651 100644
+--- a/node_modules/light-ui/lib/react/Tipso/BaseTipso/index.js
++++ b/node_modules/light-ui/lib/react/Tipso/BaseTipso/index.js
+@@ -10,10 +10,6 @@ var _classnames = require('classnames');
+ 
+ var _classnames2 = _interopRequireDefault(_classnames);
+ 
+-var _reactDom = require('react-dom');
+-
+-var _reactDom2 = _interopRequireDefault(_reactDom);
+-
+ var _propTypes = require('prop-types');
+ 
+ var _propTypes2 = _interopRequireDefault(_propTypes);
+@@ -85,7 +81,7 @@ var BaseTipso = function (_React$Component) {
+     value: function onOutsideClick(e) {
+       e = e || window.event;
+       var mouseTarget = typeof e.which !== 'undefined' ? e.which : e.button;
+-      var isDescendantOfRoot = _reactDom2.default.findDOMNode(this.tipso).contains(e.target);
++      var isDescendantOfRoot = this.tipso && this.tipso.contains(e.target);
+       if (!isDescendantOfRoot && mouseTarget === 1) {
+         this.handleShowChange(false)();
+       }
+diff --git a/node_modules/light-ui/lib/shared/components/OutsideClickHandler.js b/node_modules/light-ui/lib/shared/components/OutsideClickHandler.js
+index 1bb10a7..b0e9b54 100644
+--- a/node_modules/light-ui/lib/shared/components/OutsideClickHandler.js
++++ b/node_modules/light-ui/lib/shared/components/OutsideClickHandler.js
+@@ -10,10 +10,6 @@ var _react = require('react');
+ 
+ var _react2 = _interopRequireDefault(_react);
+ 
+-var _reactDom = require('react-dom');
+-
+-var _reactDom2 = _interopRequireDefault(_reactDom);
+-
+ var _propTypes = require('prop-types');
+ 
+ var _propTypes2 = _interopRequireDefault(_propTypes);
+@@ -108,7 +104,7 @@ var OutsideClickHandler = function (_React$Component) {
+     value: function onOutsideClick(e) {
+       e = e || window.event;
+       var mouseTarget = typeof e.which !== "undefined" ? e.which : e.button;
+-      var isDescendantOfRoot = _reactDom2.default.findDOMNode(this.childNode).contains(e.target);
++      var isDescendantOfRoot = this.childNode && this.childNode.contains(e.target);
+       if (!isDescendantOfRoot && mouseTarget === 1) {
+         var onOutsideClick = this.props.onOutsideClick;
+ 
