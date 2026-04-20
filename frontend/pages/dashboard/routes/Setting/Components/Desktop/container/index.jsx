@@ -4,8 +4,6 @@ import { connect } from 'react-redux'
 import cx from 'classnames'
 import { bindActionCreators } from 'redux'
 import { Loading, Button, Input, ClassicCard } from 'light-ui'
-import TimePicker from 'rc-times'
-import 'rc-times/css/timepicker.css'
 import settingActions from '../../../redux/actions'
 import styles from '../styles/setting.css'
 import locales from 'LOCALES'
@@ -64,6 +62,29 @@ const getReminderIndex = (value) => {
   if (index === -1) index = 0
   return index
 }
+
+const ReminderIntervalPicker = ({
+  disabled,
+  prefix,
+  value,
+  onChange
+}) => (
+  <label className={styles.reminderPicker}>
+    <span className={styles.reminderPickerPrefix}>{prefix}</span>
+    <select
+      disabled={disabled}
+      className={styles.reminderPickerSelect}
+      value={value}
+      onChange={event => onChange(event.target.value)}
+    >
+      {REMINDER_INTERVALS.map(interval => (
+        <option key={interval.id} value={interval.id}>
+          {interval.value}
+        </option>
+      ))}
+    </select>
+  </label>
+)
 
 class DesktopSetting extends React.Component {
   constructor(props) {
@@ -145,10 +166,8 @@ class DesktopSetting extends React.Component {
     )
   }
 
-  onReminderChange({ indexs }) {
-    const index = indexs[0]
-    const id = REMINDER_INTERVALS[index].id
-    this.postResumeReminderChange('type')(id)
+  onReminderChange(value) {
+    this.postResumeReminderChange('type')(value)
   }
 
   postResumeReminderChange(key) {
@@ -181,17 +200,11 @@ class DesktopSetting extends React.Component {
       panels.push((
         <Panel key="resumeReminderSetting-2">
           <div className={cx(styles.info_container, styles.subSection)}>
-            <TimePicker
-              sections={[
-                {
-                  prefix: REMINDER_PREFIX,
-                  times: REMINDER_INTERVALS.map(obj => obj.value),
-                  activeIndex: getReminderIndex(resumeInfo.reminder.type)
-                }
-              ]}
-              color="yellow"
-              padding={10}
-              onTimeChange={this.onReminderChange}
+            <ReminderIntervalPicker
+              disabled={resumeInfoLoading || resumeInfo.disabled}
+              prefix={REMINDER_PREFIX}
+              value={REMINDER_INTERVALS[getReminderIndex(resumeInfo.reminder.type)].id}
+              onChange={this.onReminderChange}
             />
             &nbsp;
             {settingTexts.resume.reminder.sendEmailTo}
