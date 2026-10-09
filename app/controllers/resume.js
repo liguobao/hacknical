@@ -15,6 +15,7 @@ import { getRecords, getLogs } from './helper/stat'
 import { isGitHubSession } from '../utils/helper'
 import { titleToPinyin } from '../utils/pinyin'
 import { canReadResume, createDownloadToken } from '../utils/resume-access'
+import { redactDownloadToken } from '../utils/redact-request'
 
 const ossConfig = config.get('services.oss')
 
@@ -200,7 +201,7 @@ const downloadResume = async (ctx) => {
     })
     logger.info(`[RESUME:RENDERED][${resultUrl}]`)
   } catch (e) {
-    logger.error(`[RESUME:DOWNLOAD:ERROR]${e}`)
+    logger.error(`[RESUME:DOWNLOAD:ERROR]${redactDownloadToken(e)}`)
   }
 
   ctx.body = {

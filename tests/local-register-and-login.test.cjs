@@ -29,7 +29,8 @@ async function launch() {
     APP_URL: 'https://hackneo.cn',
     APP_KEY: 'b'.repeat(64),
     SQLITE_PATH: database,
-    LOG_LEVEL: 'ERROR',
+    LOG_LEVEL: 'INFO',
+    DOWNLOADS_PATH: path.join(temporary, 'downloads'),
     INVITE_CODES: 'TEST-CODE-1,TEST-CODE-2,TEST-CODE-3',
     GITHUB_API_URL: 'https://api.github.com',
     GITHUB_OAUTH_CLIENT_ID: 'dummy-id',
@@ -544,6 +545,9 @@ test('flow: resume edit, persist, share toggle, public access and reverse 404', 
   )
   assert.equal(grantedDataRes.status, 200)
   assert.equal(grantedDataRes.json.result.info.name, '极客测试专家')
+  await new Promise(resolve => setTimeout(resolve, 20))
+  assert.equal(output.includes(downloadToken), false)
+  assert.ok(output.includes('"downloadToken":"[REDACTED]"'))
   const cachedPrivateRes = await unauthClient.get(`/api/resume/shared/public?hash=${resumeHash}`)
   assert.equal(cachedPrivateRes.status, 404)
   const invalidToken = downloadToken.slice(0, -1)
@@ -647,6 +651,34 @@ test('flow: resume edit, persist, share toggle, public access and reverse 404', 
   })
   assert.equal(disableShareRes.status, 200)
   assert.equal(disableShareRes.json.result.openShare, false)
+
+  const grantedAfterClose = await unauthClient.get(
+    `/api/resume/shared/public?hash=${resumeHash}&downloadToken=${downloadToken}`
+  )
+  assert.equal(grantedAfterClose.status, 200)
+
+  const pdfPath = path.join(temporary, 'downloads', String(privateInfo.userId), 'geeker', 'test.pdf')
+  fs.mkdirSync(path.dirname(pdfPath), { recursive: true })
+  fs.writeFileSync(pdfPath, '%PDF-1.4\n%%EOF\n')
+  const pdfUrl = `/downloads/${privateInfo.userId}/geeker/test.pdf`
+  const ownerPdf = await client.get(pdfUrl)
+  assert.equal(ownerPdf.status, 200)
+  assert.match(ownerPdf.headers.get('content-type'), /application\/pdf/)
+  assert.equal((await unauthClient.get(pdfUrl)).status, 404)
+  assert.equal((await unauthClient.get(`${pdfUrl}?downloadToken=${downloadToken}`)).status, 404)
+  assert.equal((await unauthClient.get(pdfUrl.replace('/downloads/', '/downloads%2F'))).status, 404)
+  assert.equal((await client.get(`/downloads/${privateInfo.userId}/geeker/missing.pdf`)).status, 404)
+
+  const legacyPath = path.join(__dirname, '..', 'public', 'downloads', String(privateInfo.userId), 'geeker', 'legacy.pdf')
+  fs.mkdirSync(path.dirname(legacyPath), { recursive: true })
+  try {
+    fs.writeFileSync(legacyPath, '%PDF-1.4\n%%EOF\n')
+    const legacyUrl = `/downloads/${privateInfo.userId}/geeker/legacy.pdf`
+    assert.equal((await unauthClient.get(legacyUrl)).status, 404)
+    assert.equal((await client.get(legacyUrl)).status, 404)
+  } finally {
+    fs.rmSync(legacyPath, { force: true })
+  }
 
   // 10. Reverse verification: unauthenticated access redirects to 404
   const closedPageRes = await unauthClient.get('/geeker/resume')
