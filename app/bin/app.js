@@ -1,6 +1,7 @@
 
 import Koa from 'koa'
 import path from 'path'
+import { format } from 'util'
 import koaLogger from 'koa-logger'
 import bodyParser from 'koa-bodyparser'
 import Csrf from 'koa-csrf'
@@ -26,6 +27,7 @@ import { redisMiddleware } from '../middlewares/cache'
 import platformMiddleware from '../middlewares/platform'
 import firewallMiddleware from '../middlewares/firewall'
 import uploadsMiddleware from '../middlewares/uploads'
+import downloadsMiddleware from '../middlewares/downloads'
 import sessionStore from '../utils/session-store'
 import { SESSION_MAX_AGE } from '../utils/constant'
 import db from '../utils/sqlite'
@@ -63,7 +65,10 @@ app.use(async (ctx, next) => {
 })
 
 // koa logger
-app.use(koaLogger())
+app.use(koaLogger({ transporter: (message, args) => {
+  args[2] = String(args[2]).split('?')[0]
+  logger.info(format(...args))
+} }))
 app.use(firewallMiddleware({
   blockList: []
 }))
@@ -136,6 +141,7 @@ app.use(async (ctx, next) => {
 // 配置nunjucks模板文件所在的路径，否则模板继承时无法使用相对路径
 nunjucks.configure(path.join(__dirname, '../templates'), { autoescape: true })
 // frontend static file
+app.use(downloadsMiddleware())
 app.use(staticServer(
   path.join(__dirname, '../../public'),
   {

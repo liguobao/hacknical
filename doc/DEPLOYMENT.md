@@ -2,6 +2,9 @@
 
 线上地址：<https://hackneo.cn>。SSH 自动部署沿用服务器上已有的项目目录 `/var/lib/dsh/workspace/hacknical`，端口为 `127.0.0.1:4000`，Nginx 负责 HTTPS。数据库、上传资源和日志分别位于 `data/`、`public/uploads/`、`log/`，发布不会删除这些目录。旧域名 `hack.r2049.cn` 的 HTTP / HTTPS 请求会以 301 跳转到新域名，保留路径和查询参数。
 
+PDF files now live in `data/downloads/`. The app checks the owner before it serves each file.
+Delete old files from `public/downloads/` after deployment. Apply `doc/nginx/hackneo.cn.conf` to stop logging query strings.
+
 ## 创建 GitHub OAuth App
 
 在 <https://github.com/settings/applications/new> 创建 **OAuth App**，填写：

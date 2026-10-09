@@ -1,12 +1,11 @@
 
 import fs from 'fs'
 import path from 'path'
-import config from 'config'
 import phantom from 'phantom'
-import PATH from '../../config/path'
+import { downloadsRoot } from '../utils/download-path'
+import { redactDownloadToken } from '../utils/redact-request'
 import logger from '../utils/logger'
 import { ensureFolder } from '../utils/files'
-import { uploadFile } from '../utils/uploader'
 
 const waitUntil = asyncFunc => new Promise((resolve, reject) => {
   const wait = () => {
@@ -46,14 +45,15 @@ const renderScreenshot = async ({ input, output, pageConfig = {} }) => {
     await waitUntil(() => page.evaluate(() => window.done))
     await page.render(output)
   } catch (e) {
-    logger.error(e.stack || e)
+    logger.error(redactDownloadToken(e.stack || e))
   } finally {
     await instance.exit()
   }
 }
 
 const ensureDownloadFolder = (folder) => {
-  const resultFolder = path.resolve(__dirname, `${PATH.ASSETS_PATH}/downloads`, folder)
+  if (!/^[A-Za-z0-9-]+\/[A-Za-z0-9-]+$/.test(folder)) throw new Error('Invalid download folder')
+  const resultFolder = path.resolve(downloadsRoot, folder)
   ensureFolder(resultFolder)
   return resultFolder
 }
@@ -64,6 +64,10 @@ export const downloadResume = async (url, options = {}) => {
     folderName,
     pageStyle
   } = options
+
+  if (!/^[A-Za-z0-9._-]+\.pdf$/.test(title) || title.includes('..')) {
+    throw new Error('Invalid download filename')
+  }
 
   const resultFolder = ensureDownloadFolder(folderName)
   const filePath = path.resolve(resultFolder, title)
@@ -83,9 +87,6 @@ export const downloadResume = async (url, options = {}) => {
       pageStyle
     }
   })
-  uploadFile({
-    filePath,
-    prefix: `${config.get('services.oss.prefix')}/${folderName}`
-  })
+  if (!fs.existsSync(filePath)) throw new Error('PDF render failed')
   return resultPath
 }
