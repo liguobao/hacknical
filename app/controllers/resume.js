@@ -15,6 +15,7 @@ import { getRecords, getLogs } from './helper/stat'
 import { isGitHubSession } from '../utils/helper'
 import { titleToPinyin } from '../utils/pinyin'
 import { canReadResume, createDownloadToken } from '../utils/resume-access'
+import { randomUUID } from 'node:crypto'
 
 const ossConfig = config.get('services.oss')
 
@@ -255,6 +256,7 @@ const getImageUploadUrl = async (ctx) => {
   const { githubLogin } = ctx.session
   const { filename } = ctx.query
 
+  if (typeof filename !== 'string') ctx.throw(400, 'Invalid image filename')
   const fileExt = filename.split('.').slice(-1)[0].toLowerCase()
 
   let mimeType = null
@@ -272,7 +274,7 @@ const getImageUploadUrl = async (ctx) => {
       throw new Error(`unsupport filetype ${fileExt}`)
   }
 
-  const filePath = `/uploads/${githubLogin}/avator/${new Date().getTime()}.${filename}`
+  const filePath = `/uploads/${githubLogin}/avator/${randomUUID()}.${fileExt}`
   const uploadUrl = getUploadUrl({
     filePath,
     mimeType
