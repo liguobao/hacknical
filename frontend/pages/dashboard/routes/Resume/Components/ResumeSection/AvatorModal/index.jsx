@@ -78,7 +78,7 @@ class AvatorModal extends React.Component {
     })
   }
 
-  async upload(filename, filetype, file) {
+  async upload(filename, file) {
     if (!file) return null
 
     const uploadInfo = await API.resume.getImageUploadUrl({
@@ -91,7 +91,7 @@ class AvatorModal extends React.Component {
         method: 'PUT',
         credentials: localUpload ? 'same-origin' : 'omit',
         headers: {
-          'Content-Type': filetype || 'application/octet-stream',
+          'Content-Type': file.type || 'application/octet-stream',
           ...(localUpload
             ? { 'X-CSRF-Token': document.getElementsByTagName('meta')['csrf-token'].content }
             : {})
@@ -119,19 +119,17 @@ class AvatorModal extends React.Component {
     let file = this.state.rawImage
     if (!file) file = await toFile(this.state.imageUrl)
 
-    const filenames = file.name.split('.')
-    const filenameThumb = [
-      ...filenames.slice(0, -1),
-      'thumb',
-      filenames.slice(-1)[0]
-    ].join('.')
-    const blob = await this.toBlob(file.type === 'image/jpg' ? 'image/jpeg' : file.type)
-    const fileThumb = new File([blob], filenameThumb)
-
     try {
+      const blob = await this.toBlob(file.type === 'image/jpg' ? 'image/jpeg' : file.type)
+      if (!blob || !['image/jpeg', 'image/png'].includes(blob.type)) {
+        throw new Error('Image format is not supported')
+      }
+      const extension = blob.type === 'image/jpeg' ? 'jpg' : 'png'
+      const filenameThumb = `${file.name.replace(/\.[^.]+$/, '')}.thumb.${extension}`
+      const fileThumb = new File([blob], filenameThumb, { type: blob.type })
       const [thumbImage, _] = await Promise.all([
-        this.upload(filenameThumb, file.type, fileThumb),
-        this.upload(file.name, file.type, file)
+        this.upload(filenameThumb, fileThumb),
+        this.upload(file.name, file)
       ])
       message.notice(resumeInfoText.avator.success)
       onSubmit && onSubmit(thumbImage.previewUrl)

@@ -8,6 +8,7 @@ const { spawn } = require('node:child_process')
 const { once } = require('node:events')
 
 const image = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lXcAAAAASUVORK5CYII=', 'base64')
+const jpeg = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'src', 'images', 'gold.jpeg'))
 
 async function unusedPort() {
   const server = http.createServer()
@@ -141,6 +142,27 @@ test('local uploads require login, CSRF and valid image data', async () => {
     assert.equal(publicImage.response.status, 200)
     assert.equal(publicImage.response.headers.get('x-content-type-options'), 'nosniff')
     assert.equal(publicImage.response.headers.get('content-security-policy'), 'sandbox')
+
+    for (const extension of ['jpg', 'jpeg']) {
+      const jpegInfo = await call(`/api/resume/image/upload?filename=avatar.${extension}`)
+      assert.equal(jpegInfo.response.status, 200, jpegInfo.body)
+      const jpegUrl = JSON.parse(jpegInfo.body).result.uploadUrl
+      assert.match(jpegUrl, new RegExp(`\\.${extension}$`))
+
+      const wrongData = await call(jpegUrl, {
+        method: 'PUT', headers: { 'Content-Type': 'image/jpeg', 'X-CSRF-Token': csrf }, body: image
+      })
+      assert.equal(wrongData.response.status, 415)
+
+      const acceptedJpeg = await call(jpegUrl, {
+        method: 'PUT', headers: { 'Content-Type': 'image/jpeg', 'X-CSRF-Token': csrf }, body: jpeg
+      })
+      assert.equal(acceptedJpeg.response.status, 200, acceptedJpeg.body)
+
+      const publicJpeg = await call(jpegUrl)
+      assert.equal(publicJpeg.response.status, 200)
+      assert.match(publicJpeg.response.headers.get('content-type'), /^image\/jpeg/)
+    }
 
     const legacyHtml = path.join(uploadFolder, 'legacy.html')
     fs.writeFileSync(legacyHtml, '<script>window.audit = true</script>')
