@@ -6,6 +6,7 @@ const { once } = require('node:events')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
+const { randomUUID } = require('node:crypto')
 
 let app, origin, temporary, database, output = ''
 
@@ -395,6 +396,7 @@ test('resume ids do not grant access to another account', async () => {
   await owner.get('/resumeowner')
   const ownerList = await owner.get('/api/resume/list')
   const ownerResumeId = ownerList.json.result[0].resumeId
+  const ownerResumeHash = ownerList.json.result[0].resumeHash
   const ownerUpdate = await owner.put('/api/resume/data', {
     resumeId: ownerResumeId,
     resume: { info: { name: 'Owner data' } }
@@ -415,11 +417,23 @@ test('resume ids do not grant access to another account', async () => {
   const read = await visitor.get(`/api/resume/data?resumeId=${ownerResumeId}`)
   assert.equal(read.status, 404)
 
+  const readInfo = await visitor.get(`/api/resume/info?resumeId=${ownerResumeId}`)
+  assert.equal(readInfo.status, 404)
+
   const write = await visitor.put('/api/resume/data', {
     resumeId: ownerResumeId,
     resume: { info: { name: 'Changed by visitor' } }
   })
   assert.equal(write.status, 404)
+
+  const missingResumeId = randomUUID()
+  const writeMissing = await visitor.put('/api/resume/data', {
+    resumeId: missingResumeId,
+    resume: { info: { name: 'Unexpected resume' } }
+  })
+  assert.equal(writeMissing.status, 404)
+  const readMissing = await visitor.get(`/api/resume/data?resumeId=${missingResumeId}`)
+  assert.equal(readMissing.status, 404)
 
   const settings = await visitor.patch('/api/resume/info', {
     resumeId: ownerResumeId,
@@ -439,6 +453,16 @@ test('resume ids do not grant access to another account', async () => {
 
   const visitorList = await visitor.get('/api/resume/list')
   assert.equal(visitorList.json.result.length, 1)
+
+  const share = await owner.patch('/api/resume/info', {
+    resumeId: ownerResumeId,
+    info: { openShare: true }
+  })
+  assert.equal(share.status, 200)
+  const anonymous = browser()
+  const publicInfo = await anonymous.get(`/api/resume/info?hash=${ownerResumeHash}`)
+  assert.equal(publicInfo.status, 200)
+  assert.equal(publicInfo.json.result.resumeHash, ownerResumeHash)
 })
 
 test('smooth migration from legacy schema with existing data (no is_default column initially)', async () => {
