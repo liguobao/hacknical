@@ -59,9 +59,9 @@ class AvatorModal extends React.Component {
     this.handleFileChange = this.handleFileChange.bind(this)
   }
 
-  toBlob() {
+  toBlob(type) {
     return new Promise((resolve) => {
-      this.cropper.getCroppedCanvas().toBlob(blob => resolve(blob))
+      this.cropper.getCroppedCanvas().toBlob(blob => resolve(blob), type)
     })
   }
 
@@ -84,16 +84,22 @@ class AvatorModal extends React.Component {
     const uploadInfo = await API.resume.getImageUploadUrl({
       filename: filename
     })
-    await request(
+    const localUpload = uploadInfo.uploadUrl.startsWith('/uploads/')
+    const response = await request(
       uploadInfo.uploadUrl,
       {
         method: 'PUT',
+        credentials: localUpload ? 'same-origin' : 'omit',
         headers: {
-          'Content-Type': filetype || 'application/octet-stream'
+          'Content-Type': filetype || 'application/octet-stream',
+          ...(localUpload
+            ? { 'X-CSRF-Token': document.getElementsByTagName('meta')['csrf-token'].content }
+            : {})
         },
         body: file,
       }
     )
+    if (!response.ok) throw new Error('Image upload failed')
     return uploadInfo
   }
 
@@ -119,7 +125,7 @@ class AvatorModal extends React.Component {
       'thumb',
       filenames.slice(-1)[0]
     ].join('.')
-    const blob = await this.toBlob()
+    const blob = await this.toBlob(file.type === 'image/jpg' ? 'image/jpeg' : file.type)
     const fileThumb = new File([blob], filenameThumb)
 
     try {
