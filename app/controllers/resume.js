@@ -5,7 +5,6 @@ import getCacheKey from './helper/cacheKey'
 import * as download from '../services/downloads'
 import dateHelper from '../utils/date'
 import logger from '../utils/logger'
-import NewError from '../utils/error'
 import notify from '../services/notify'
 import network from '../services/network'
 import Home from './home'
@@ -64,6 +63,11 @@ const getResume = async (ctx) => {
   } = ctx.session
   const { locale, resumeId } = ctx.query
   const data = await network.user.getResume({ userId, locale, resumeId })
+  if (resumeId && !data) {
+    ctx.status = 404
+    ctx.body = { success: false, message: 'Resume not found' }
+    return
+  }
 
   const { resume = null } = (data || {})
   if (
@@ -99,6 +103,11 @@ const setResume = async (ctx, next) => {
   const { message, resumeId: queryResumeId } = ctx.query
   const resumeId = bodyResumeId || queryResumeId
   const { userId, githubLogin } = ctx.session
+  if (resumeId && !await network.user.getResumeInfo({ userId, resumeId })) {
+    ctx.status = 404
+    ctx.body = { success: false, message: 'Resume not found' }
+    return
+  }
 
   const result = await network.user.updateResume({
     userId,
@@ -153,11 +162,12 @@ const downloadResume = async (ctx) => {
     network.user.getResumeInfo({ userId, resumeId }),
     network.user.getResume({ userId, locale, resumeId })
   ])
-  const { template, resumeHash } = resumeInfo
-
-  if (!findResult) {
-    throw new NewError.NotfoundError(ctx.__('messages.error.emptyResume'))
+  if (!resumeInfo || !findResult) {
+    ctx.status = 404
+    ctx.body = { success: false, message: 'Resume not found' }
+    return
   }
+  const { template, resumeHash } = resumeInfo
 
   const updateTime = findResult.update_at || findResult.updated_at
   const seconds = dateHelper.getSeconds(updateTime)
@@ -414,6 +424,11 @@ const setResumeInfo = async (ctx) => {
   const { resumeId: queryResumeId } = ctx.query
   const resumeId = bodyResumeId || queryResumeId || (info && info.resumeId)
   const { userId, githubLogin } = ctx.session
+  if (resumeId && !await network.user.getResumeInfo({ userId, resumeId })) {
+    ctx.status = 404
+    ctx.body = { success: false, message: 'Resume not found' }
+    return
+  }
 
   const result = await network.user.setResumeInfo({
     info,

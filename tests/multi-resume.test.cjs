@@ -382,6 +382,65 @@ test('multi-resume workflow: create, list, edit independently, switch default, c
   assert.match(deleteResFail.json.message, /至少需要保留一份简历/)
 })
 
+test('resume ids do not grant access to another account', async () => {
+  const owner = browser()
+  await owner.get('/')
+  const ownerSignup = await owner.post('/api/user/signup', {
+    username: 'resumeowner',
+    email: 'resumeowner@example.test',
+    password: 'password123',
+    inviteCode: 'MULTI-CODE-1'
+  })
+  assert.equal(ownerSignup.status, 200)
+  await owner.get('/resumeowner')
+  const ownerList = await owner.get('/api/resume/list')
+  const ownerResumeId = ownerList.json.result[0].resumeId
+  const ownerUpdate = await owner.put('/api/resume/data', {
+    resumeId: ownerResumeId,
+    resume: { info: { name: 'Owner data' } }
+  })
+  assert.equal(ownerUpdate.status, 200)
+
+  const visitor = browser()
+  await visitor.get('/')
+  const visitorSignup = await visitor.post('/api/user/signup', {
+    username: 'resumevisitor',
+    email: 'resumevisitor@example.test',
+    password: 'password123',
+    inviteCode: 'MULTI-CODE-2'
+  })
+  assert.equal(visitorSignup.status, 200)
+  await visitor.get('/resumevisitor')
+
+  const read = await visitor.get(`/api/resume/data?resumeId=${ownerResumeId}`)
+  assert.equal(read.status, 404)
+
+  const write = await visitor.put('/api/resume/data', {
+    resumeId: ownerResumeId,
+    resume: { info: { name: 'Changed by visitor' } }
+  })
+  assert.equal(write.status, 404)
+
+  const settings = await visitor.patch('/api/resume/info', {
+    resumeId: ownerResumeId,
+    info: { openShare: true }
+  })
+  assert.equal(settings.status, 404)
+
+  const download = await visitor.get(`/api/resume/download?resumeId=${ownerResumeId}`)
+  assert.equal(download.status, 404)
+
+  const ownerData = await owner.get(`/api/resume/data?resumeId=${ownerResumeId}`)
+  assert.equal(ownerData.status, 200)
+  assert.equal(ownerData.json.result.info.name, 'Owner data')
+
+  const ownerInfo = await owner.get(`/api/resume/info?resumeId=${ownerResumeId}`)
+  assert.equal(ownerInfo.json.result.openShare, false)
+
+  const visitorList = await visitor.get('/api/resume/list')
+  assert.equal(visitorList.json.result.length, 1)
+})
+
 test('smooth migration from legacy schema with existing data (no is_default column initially)', async () => {
   await stop()
 
