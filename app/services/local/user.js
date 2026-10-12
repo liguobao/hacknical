@@ -404,36 +404,40 @@ const getUserCount = async () => {
 const findResumeRow = (qs = {}) => {
   if (qs.resumeId) {
     if (qs.userId) {
-      const row = db.prepare(`
+      return db.prepare(`
         SELECT r.*, u.github_login FROM resumes r
         JOIN users u ON u.user_id = r.user_id
         WHERE r.resume_id = ? AND r.user_id = ?
-      `).get(String(qs.resumeId), String(qs.userId))
-      if (row) return row
+      `).get(String(qs.resumeId), String(qs.userId)) || null
     }
-    const row = db.prepare(`
+    return db.prepare(`
       SELECT r.*, u.github_login FROM resumes r
       JOIN users u ON u.user_id = r.user_id
       WHERE r.resume_id = ?
-    `).get(String(qs.resumeId))
-    if (row) return row
+    `).get(String(qs.resumeId)) || null
   }
   if (qs.pinyin) {
     if (qs.userId) {
-      const row = db.prepare(`
+      return db.prepare(`
         SELECT r.*, u.github_login FROM resumes r
         JOIN users u ON u.user_id = r.user_id
         WHERE r.pinyin = ? AND r.user_id = ?
-      `).get(String(qs.pinyin), String(qs.userId))
-      if (row) return row
+      `).get(String(qs.pinyin), String(qs.userId)) || null
     }
   }
   if (qs.hash) {
+    if (qs.userId) {
+      return db.prepare(`
+        SELECT r.*, u.github_login FROM resumes r
+        JOIN users u ON u.user_id = r.user_id
+        WHERE r.resume_hash = ? AND r.user_id = ?
+      `).get(String(qs.hash), String(qs.userId)) || null
+    }
     return db.prepare(`
       SELECT r.*, u.github_login FROM resumes r
       JOIN users u ON u.user_id = r.user_id
       WHERE r.resume_hash = ?
-    `).get(String(qs.hash))
+    `).get(String(qs.hash)) || null
   }
   if (qs.userId) {
     let row = db.prepare(`
@@ -484,7 +488,7 @@ const getResumeInfo = async (qs = {}) => rowToResumeInfo(findResumeRow(qs))
 
 const getResume = async (qs = {}) => {
   let row = findResumeRow(qs)
-  if (!row && qs.userId) {
+  if (!row && qs.userId && !qs.resumeId && !qs.hash && !qs.pinyin) {
     const user = await getUser({ userId: qs.userId })
     if (user) {
       createResume(user.userId, user.login)
@@ -529,6 +533,7 @@ const updateResume = async ({
 }) => {
   let targetUserId = userId
   let row = findResumeRow({ resumeId, userId: targetUserId })
+  if (resumeId && !row) throw new Error('Resume does not exist')
   if (!row && login) {
     const user = await getUser({ login })
     if (user) {
@@ -564,6 +569,7 @@ const updateResume = async ({
 const setResumeInfo = async ({ userId, login, resumeId, info = {} }) => {
   let targetUserId = userId
   let row = findResumeRow({ resumeId, userId: targetUserId })
+  if (resumeId && !row) throw new Error('Resume does not exist')
   if (!row && login) {
     const user = await getUser({ login })
     if (user) {
