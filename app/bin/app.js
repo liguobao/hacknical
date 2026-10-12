@@ -68,7 +68,6 @@ app.use(firewallMiddleware({
   blockList: []
 }))
 app.use(cors())
-app.use(uploadsMiddleware())
 
 // bodyparser
 app.use(bodyParser({
@@ -117,7 +116,21 @@ app.use(localeMiddleware())
 // catch error
 app.use(errorMiddleware())
 // csrf
-app.use(new Csrf())
+app.use(new Csrf({
+  errorHandler: (ctx) => {
+    if (!ctx.path.startsWith('/uploads/')) ctx.throw(403, 'Invalid CSRF token')
+    ctx.status = 403
+    ctx.body = { success: false, message: 'Invalid CSRF token' }
+  }
+}))
+app.use(uploadsMiddleware())
+app.use(async (ctx, next) => {
+  if (ctx.path.startsWith('/uploads/')) {
+    ctx.set('X-Content-Type-Options', 'nosniff')
+    ctx.set('Content-Security-Policy', 'sandbox')
+  }
+  await next()
+})
 // helper func
 app.use(async (ctx, next) => {
   ctx.state = Object.assign({}, ctx.state, {
