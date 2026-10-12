@@ -11,6 +11,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
+      CHROME_PATH: /usr/bin/chromium
+      CHROME_NO_SANDBOX: "1"
       APP_URL: ${APP_URL:-}
       APP_KEY: ${APP_KEY:-}
       GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID:-}
