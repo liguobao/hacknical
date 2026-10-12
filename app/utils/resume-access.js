@@ -27,6 +27,7 @@ export const verifyDownloadToken = (hash, token) => {
   return timingSafeEqual(actual, expected)
 }
 
+// A signed grant remains valid until it expires, even after the owner closes public sharing.
 export const canReadResume = (resumeInfo, session, downloadToken) => Boolean(
   resumeInfo && (
     resumeInfo.openShare

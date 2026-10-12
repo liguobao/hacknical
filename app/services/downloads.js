@@ -1,15 +1,14 @@
 
 import fs from 'fs'
 import path from 'path'
-import config from 'config'
-import PATH from '../../config/path'
 import logger from '../utils/logger'
 import { ensureFolder } from '../utils/files'
-import { uploadFile } from '../utils/uploader'
 import { renderUrlToPdf } from '../utils/chrome-pdf'
+import { downloadsRoot } from '../utils/download-path'
 
 const ensureDownloadFolder = (folder) => {
-  const resultFolder = path.resolve(PATH.ASSETS_PATH, 'downloads', folder)
+  if (!/^[A-Za-z0-9-]+\/[A-Za-z0-9-]+$/.test(folder)) throw new Error('Invalid download folder')
+  const resultFolder = path.resolve(downloadsRoot, folder)
   ensureFolder(resultFolder)
   return resultFolder
 }
@@ -20,6 +19,10 @@ export const downloadResume = async (url, options = {}) => {
     folderName,
     pageStyle
   } = options
+
+  if (!/^[A-Za-z0-9._-]+\.pdf$/.test(title) || title.includes('..')) {
+    throw new Error('Invalid download filename')
+  }
 
   const resultFolder = ensureDownloadFolder(folderName)
   const filePath = path.resolve(resultFolder, title)
@@ -42,14 +45,8 @@ export const downloadResume = async (url, options = {}) => {
     output: filePath,
     pageStyle
   })
-
   if (!fs.existsSync(filePath) || fs.statSync(filePath).size < 100) {
     throw new Error(`PDF render produced no usable file at ${filePath}`)
   }
-
-  uploadFile({
-    filePath,
-    prefix: `${config.get('services.oss.prefix')}/${folderName}`
-  })
   return resultPath
 }

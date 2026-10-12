@@ -15,6 +15,7 @@ import { isGitHubSession } from '../utils/helper'
 import { titleToPinyin } from '../utils/pinyin'
 import { canReadResume, createDownloadToken } from '../utils/resume-access'
 import { randomUUID } from 'node:crypto'
+import { redactDownloadToken } from '../utils/redact-request'
 
 const ossConfig = config.get('services.oss')
 
@@ -215,7 +216,7 @@ const downloadResume = async (ctx) => {
     })
     logger.info(`[RESUME:RENDERED][${resultUrl}]`)
   } catch (e) {
-    logger.error(`[RESUME:DOWNLOAD:ERROR] ${e && e.stack ? e.stack : e}`)
+    logger.error(`[RESUME:DOWNLOAD:ERROR] ${redactDownloadToken(e && e.stack ? e.stack : e)}`)
   }
 
   ctx.body = {

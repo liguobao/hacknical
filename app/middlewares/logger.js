@@ -1,11 +1,12 @@
 
 import logger from '../utils/logger'
+import { redactDownloadToken, safeQuery } from '../utils/redact-request'
 
 export const isTargetRequest = (ctx, whiteList) => {
   const method = ctx.request.method.toUpperCase()
   const { url } = ctx.request
   const checked = whiteList.some(option => option.method === method && option.url.test(url))
-  if (checked) logger.info(`[WHITELIST][method:${method}] ${url}`)
+  if (checked) logger.info(`[WHITELIST][method:${method}] ${redactDownloadToken(url)}`)
   return checked
 }
 
@@ -28,9 +29,7 @@ const loggerMiddleware = (options = {}) => async (ctx, next) => {
       `[METHOD] ${ctx.request.method}`,
       `[IP] ${ctx.request.ip}`,
       `[${device.toUpperCase()}] ${browser}:${platform}`,
-      `[QUERY] ${JSON.stringify(ctx.query)}`,
-      `[BODY] ${JSON.stringify(ctx.request.body)}`,
-      `[SESSION] ${JSON.stringify(ctx.session)}`
+      `[QUERY] ${JSON.stringify(safeQuery(ctx.query))}`
     ].join('\n')
   )
   await next()

@@ -3,6 +3,7 @@ import logger from '../utils/logger'
 import { ERRORS } from '../utils/error'
 import notify from '../services/notify'
 import Home from '../controllers/home'
+import { redactDownloadToken, safeQuery } from '../utils/redact-request'
 
 const printer = object => Object.keys(object).reduce((list, key) => {
   if (/^_/.test(key)) return list
@@ -16,7 +17,7 @@ const redirect = async (ctx) => {
   const { url } = ctx
 
   if (/^\/dashboard/g.test(url)) {
-    logger.info(`[OLD URL REQUEST][${ctx.status}][${url}]`)
+    logger.info(`[OLD URL REQUEST][${ctx.status}][${redactDownloadToken(url)}]`)
     const { githubLogin } = ctx.session
     if (!githubLogin) {
       return await ctx.redirect('/api/user/logout')
@@ -25,7 +26,7 @@ const redirect = async (ctx) => {
   }
 
   if (ctx.status === 404) {
-    if (ctx.path.startsWith('/api/')) return false
+    if (ctx.path.startsWith('/api/') || ctx.path.startsWith('/downloads')) return false
     return ctx.redirect('/404')
   }
 
@@ -39,17 +40,17 @@ const render500 = async (ctx, err) => {
       type: 'error',
       data: [
         '[Error]',
-        err.stack,
+        redactDownloadToken(err.stack || err),
         '[Request url]',
         printer({
-          href: ctx.request.href,
+          path: ctx.path,
           method: ctx.request.method,
           origin: ctx.request.header.origin || ctx.request.origin,
-          querystring: ctx.request.querystring
+          query: safeQuery(ctx.query)
         }),
         `[Server status] ${ctx.status}`,
         '[Server session]',
-        printer(ctx.session),
+        printer({ userId: ctx.session.userId }),
         `[IP] ${ctx.request.ip}`
       ].join('\n')
     }
@@ -68,7 +69,7 @@ const catchError = () => async (ctx, next) => {
     await next()
     await redirect(ctx)
   } catch (err) {
-    logger.error(err.stack || err)
+    logger.error(redactDownloadToken(err.stack || err))
 
     const { message, errorCode } = err
     const { pathname } = ctx.request.URL
