@@ -9,6 +9,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
+      CHROME_PATH: /usr/bin/chromium
+      CHROME_NO_SANDBOX: "1"
       LOG_LEVEL: INFO
       INVITE_CODE_MAX_USES: ${INVITE_CODE_MAX_USES:-1}
     volumes:

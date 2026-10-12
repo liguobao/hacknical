@@ -169,7 +169,6 @@
     "moment": "^2.31.0",
     "mq-utils": "^0.1.0",
     "nunjucks": "^3.2.4",
-    "phantom": "^6.3.0",
     "pinyin": "^4.0.0",
     "rc-times": "0.0.6",
     "react-cropper": "^2.3.3",

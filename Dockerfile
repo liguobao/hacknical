@@ -5,9 +5,8 @@ FROM node:22-bookworm-slim AS builder
 
 WORKDIR /app
 
-# 安装构建与解压工具 (bzip2 供 phantomjs-prebuilt 解压二进制)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends bzip2 ca-certificates && \
+    apt-get install -y --no-install-recommends ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 # 安装依赖
@@ -31,11 +30,19 @@ FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production \
-    PORT=4000
+    PORT=4000 \
+    CHROME_PATH=/usr/bin/chromium \
+    CHROME_NO_SANDBOX=1
 
-# 安装运行时所需的基础字体与证书库 (供 phantom 导出 PDF/图片等服务)
+# Chromium for resume PDF export + fonts for CJK/latin rendering
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ca-certificates fontconfig fonts-dejavu-core && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      chromium \
+      fontconfig \
+      fonts-dejavu-core \
+      fonts-noto-cjk \
+      fonts-liberation && \
     rm -rf /var/lib/apt/lists/*
 
 # 拷贝生产依赖与构建产物
@@ -46,7 +53,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/config ./config
 
 # 创建挂载与运行所需目录
-RUN mkdir -p data log public/uploads
+RUN mkdir -p data log public/uploads public/downloads
 
 EXPOSE 4000
 

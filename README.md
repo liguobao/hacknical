@@ -16,8 +16,9 @@ This project is forked from [ecmadao/hacknical](https://github.com/ecmadao/hackn
 
 - Node.js 22.13 or newer
 - npm 10 or newer
+- Chrome or Chromium on `PATH` (or set `CHROME_PATH`) for resume PDF download
 
-The current local runtime uses Node's built-in SQLite driver, an in-process memory cache, a no-op message queue, and local file storage. MongoDB, Redis, and a separate object-storage service are not required for local development or deployment.
+The current local runtime uses Node's built-in SQLite driver, an in-process memory cache, a no-op message queue, and local file storage. MongoDB, Redis, and a separate object-storage service are not required for local development or deployment. Docker images install Chromium automatically.
 
 ## Local development
 

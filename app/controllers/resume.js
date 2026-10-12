@@ -162,10 +162,14 @@ const downloadResume = async (ctx) => {
   const updateTime = findResult.update_at || findResult.updated_at
   const seconds = dateHelper.getSeconds(updateTime)
 
-  const origin = (config.has('url') && config.get('url')) || resolveOrigin(ctx, ctx.request.origin)
+  // Headless Chrome must hit this same process. Prefer loopback over public APP_URL
+  // so Docker / local production renders do not depend on outbound HTTPS hairpin NAT.
+  const listenPort = process.env.PORT || config.get('port') || 4000
+  const renderOrigin = `http://127.0.0.1:${listenPort}`
   const downloadToken = createDownloadToken(resumeHash)
+  const resumePath = getResumeShareStatus(resumeInfo, locale, renderOrigin).url
   const resumeUrl =
-    `${origin.replace(/\/$/, '')}/${getResumeShareStatus(resumeInfo, locale, origin).url}&downloadToken=${downloadToken}&fromDownload=true`
+    `${renderOrigin}/${resumePath}&downloadToken=${encodeURIComponent(downloadToken)}&fromDownload=true`
 
   notify.slack({
     mq: ctx.mq,
@@ -200,7 +204,7 @@ const downloadResume = async (ctx) => {
     })
     logger.info(`[RESUME:RENDERED][${resultUrl}]`)
   } catch (e) {
-    logger.error(`[RESUME:DOWNLOAD:ERROR]${e}`)
+    logger.error(`[RESUME:DOWNLOAD:ERROR] ${e && e.stack ? e.stack : e}`)
   }
 
   ctx.body = {
@@ -216,7 +220,8 @@ const renderResumePage = async (ctx) => {
   const { fromDownload } = ctx.query
   const user = await network.user.getUser({ login })
 
-  const { device } = ctx.state
+  // PDF export always needs the desktop template regardless of headless UA.
+  const device = fromDownload ? 'desktop' : ctx.state.device
   const { githubLogin } = ctx.session
   const isAdmin = login === githubLogin
   const { userName, userId } = user
