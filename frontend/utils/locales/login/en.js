@@ -7,9 +7,9 @@ const datas = {
   },
   login: {
     loginButton: 'Login by GitHub',
-    loginText: 'BUILD AN ONLINE RESUME THAT FEELS LIKE YOU',
-    valueTitle: 'Turn your experience into a clear profile',
-    description: 'A lightweight, easy-to-use, free, and open source online resume platform. Spend less time wrestling with templates and formatting: organize your experience, work, and ideas in one clear page that is easy to update and share. Keep it as your long-term professional profile and send one link to friends, colleagues, or the teams you want to meet.',
+    loginText: 'Build your online resume in minutes',
+    valueTitle: 'More than a resume — a digital profile that keeps evolving',
+    description: 'No templates, no layout struggles. Your experience, GitHub projects, and online work are the best resume content.',
     features: ['Focus on what you can do', 'Share everything with one link', 'You stay in control of your data'],
     topbarLogin: 'LOGIN',
     topbarAbout: 'ABOUT'
