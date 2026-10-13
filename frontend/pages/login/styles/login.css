@@ -87,11 +87,65 @@
   width: 80%;
   justify-content: flex-start;
   align-items: flex-start;
+  max-width: 1080px;
+  flex-direction: row;
+  gap: clamp(40px, 7vw, 96px);
+}
+
+.loginMain {
+  flex: 1 1 600px;
+  min-width: 0;
 }
 
 .loginIntro {
   font-size: 1rem;
   color: var(--oc-gray-1);
+}
+
+.valueDescription {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--oc-gray-3);
+}
+
+.valueCard {
+  flex: 0 1 320px;
+  margin-top: 30px;
+  padding: 24px 26px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 4px;
+  background-color: rgba(24, 24, 24, 0.72);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  text-align: left;
+  pointer-events: auto;
+}
+
+.valueCardTitle {
+  margin-bottom: 12px;
+  color: var(--oc-white);
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+.valuePoints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 12px;
+  color: var(--oc-gray-5);
+  font-size: 13px;
+}
+
+.valuePoint {
+  position: relative;
+}
+
+.valuePoint:not(:first-child)::before {
+  content: '·';
+  position: absolute;
+  left: -12px;
+  color: var(--oc-green-5);
 }
 
 .logo {
@@ -265,6 +319,23 @@
 }
 
 @media (max-width: 800px) {
+  .loginPannel {
+    width: 90%;
+    gap: 22px;
+  }
+
+  .loginMain {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .valueCard {
+    flex-basis: auto;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 0;
+  }
+
   .statistic {
     & span {
       font-size: 2em;
@@ -285,6 +356,15 @@
 
   .loginIntro {
     font-size: 0.8rem;
+  }
+
+  .valueDescription {
+    font-size: 13px;
+  }
+
+  .valuePoints {
+    gap: 6px 16px;
+    font-size: 12px;
   }
 }
 

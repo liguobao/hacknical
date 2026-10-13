@@ -179,12 +179,10 @@ class LoginPanel extends React.PureComponent {
     const statistic = await API.home.statistic()
     const {
       users,
-      github = {},
       resume = {}
     } = (statistic || {})
 
     const usersCount = Number(users || DEFAULT_NUM)
-    const githubPageview = (github && github.pageview) || DEFAULT_NUM
     const resumePageview = (resume && resume.pageview) || DEFAULT_NUM
     const resumeCount = (resume && resume.count) || DEFAULT_NUM
     const resumeDownload = (resume && resume.download) || DEFAULT_NUM
@@ -194,7 +192,6 @@ class LoginPanel extends React.PureComponent {
     this.setState({
       statistic: {
         usersCount,
-        githubPageview,
         resumePageview,
         resumeNum
       },
@@ -209,7 +206,6 @@ class LoginPanel extends React.PureComponent {
 
     const {
       usersCount,
-      githubPageview,
       resumePageview,
       resumeNum
     } = statistic
@@ -220,11 +216,6 @@ class LoginPanel extends React.PureComponent {
           {usersCount}
         </strong>
         {statisticText.developers}
-        <br />
-        <strong className={styles.statisticGitHubPv}>
-          {githubPageview}
-        </strong>
-        {statisticText.githubPageview}
         <br />
         <strong className={styles.statisticResumePv}>
           {resumePageview}
@@ -258,7 +249,6 @@ class LoginPanel extends React.PureComponent {
 
     const {
       usersCount,
-      githubPageview,
       resumePageview,
       resumeNum
     } = statistic
@@ -278,7 +268,7 @@ class LoginPanel extends React.PureComponent {
         <span>·</span>
         <CountByStep
           start={0}
-          end={Number(githubPageview) + Number(resumePageview)}
+          end={Number(resumePageview)}
           duration={3500}
           render={
             num => (
@@ -503,38 +493,49 @@ class LoginPanel extends React.PureComponent {
           </a>
         </div>
         <div className={styles.loginPannel}>
-          <LogoText theme="light" className={styles.logo} />
-          <div className={styles.loginButtonGroup}>
-            <ClassicButton
-              theme="light"
-              onClick={() => window.location = loginLink}
-              buttonContainerClassName={styles.loginButton}
-            >
-              <a
-                href={loginLink}
-                className={styles.githubLoginLink}
+          <div className={styles.loginMain}>
+            <LogoText theme="light" className={styles.logo} />
+            <div className={styles.loginButtonGroup}>
+              <ClassicButton
+                theme="light"
+                onClick={() => window.location = loginLink}
+                buttonContainerClassName={styles.loginButton}
               >
-                <Icon icon="github" />
-                &nbsp;
-                {loginText.loginButton}
-              </a>
-            </ClassicButton>
-            <div
-              className={styles.subActionBtn}
-              onClick={() => this.openModal('login')}
-            >
-              {authText.localLoginButton}
+                <a
+                  href={loginLink}
+                  className={styles.githubLoginLink}
+                >
+                  <Icon icon="github" />
+                  &nbsp;
+                  {loginText.loginButton}
+                </a>
+              </ClassicButton>
+              <div
+                className={styles.subActionBtn}
+                onClick={() => this.openModal('login')}
+              >
+                {authText.localLoginButton}
+              </div>
+            </div>
+            <Terminal
+              className={styles.loginIntro}
+              wordLines={[`$ ${loginText.loginText}`]}
+            />
+            <div className={styles.statisticContainer}>
+              {this.renderLoading()}
+              {this.renderStatistic()}
+              {this.renderModal()}
             </div>
           </div>
-          <Terminal
-            className={styles.loginIntro}
-            wordLines={[`$ ${loginText.loginText}`]}
-          />
-          <div className={styles.statisticContainer}>
-            {this.renderLoading()}
-            {this.renderStatistic()}
-            {this.renderModal()}
-          </div>
+          <aside className={styles.valueCard}>
+            <div className={styles.valueCardTitle}>{loginText.valueTitle}</div>
+            <p className={styles.valueDescription}>{loginText.description}</p>
+            <div className={styles.valuePoints}>
+              {(loginText.features || []).map((feature, index) => (
+                <span key={index} className={styles.valuePoint}>{feature}</span>
+              ))}
+            </div>
+          </aside>
         </div>
         {this.renderAuthModal()}
       </div>

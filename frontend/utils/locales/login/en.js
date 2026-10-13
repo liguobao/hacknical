@@ -2,13 +2,15 @@
 const datas = {
   statistic: {
     developers: ' developers here.',
-    githubPageview: ' count that GitHub analysis page was shared.',
     resumePageview: ' count that resume page was shared.',
     resumes: ' resumes were created or download'
   },
   login: {
     loginButton: 'Login by GitHub',
-    loginText: 'USE GITHUB DATA TO MAKE A BETTER RESUME',
+    loginText: 'BUILD AN ONLINE RESUME THAT FEELS LIKE YOU',
+    valueTitle: 'Turn your experience into a clear profile',
+    description: 'A lightweight, easy-to-use, free, and open source online resume platform. Spend less time wrestling with templates and formatting: organize your experience, work, and ideas in one clear page that is easy to update and share. Keep it as your long-term professional profile and send one link to friends, colleagues, or the teams you want to meet.',
+    features: ['Focus on what you can do', 'Share everything with one link', 'You stay in control of your data'],
     topbarLogin: 'LOGIN',
     topbarAbout: 'ABOUT'
   },
