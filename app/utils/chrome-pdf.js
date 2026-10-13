@@ -243,35 +243,96 @@ const waitForWindowDone = async (client, sessionId, timeoutMs) => {
   throw new Error(`Timeout waiting for window.done after ${timeoutMs}ms`)
 }
 
+const PREPARE_PRINT_CSS = `
+html, body {
+  background-color: #fff !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+#footer, #loading, #wechat-image { display: none !important; }
+#resume { margin: 0 !important; padding: 0 !important; }
+#resume [class*="desktop_container"],
+#resume [class*="mobile_container"] {
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+}
+#resume [class*="container"],
+#resume [class*="wrapper"] {
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+`
+
+const preparePageForPrint = async (client, sessionId) => {
+  await client.send('Runtime.evaluate', {
+    expression: `(() => {
+      const existing = document.getElementById('hacknical-pdf-print')
+      if (existing) existing.remove()
+      const style = document.createElement('style')
+      style.id = 'hacknical-pdf-print'
+      style.textContent = ${JSON.stringify(PREPARE_PRINT_CSS)}
+      document.head.appendChild(style)
+      window.scrollTo(0, 0)
+      return true
+    })()`,
+    returnByValue: true
+  }, sessionId)
+  // Allow layout to settle after stripping height/margin/shadow.
+  await sleep(300)
+}
+
+const measureResumeContent = async (client, sessionId) => {
+  const evaluated = await client.send('Runtime.evaluate', {
+    expression: `(() => {
+      const root = document.querySelector('#resume') || document.body
+      const rect = root.getBoundingClientRect()
+      const width = Math.ceil(Math.max(
+        root.scrollWidth || 0,
+        rect.width || 0,
+        document.documentElement.scrollWidth || 0,
+        document.body ? document.body.scrollWidth : 0,
+        800
+      ))
+      const height = Math.ceil(Math.max(
+        root.scrollHeight || 0,
+        rect.height || 0,
+        document.documentElement.scrollHeight || 0,
+        document.body ? document.body.scrollHeight : 0,
+        600
+      ))
+      return { width, height }
+    })()`,
+    returnByValue: true
+  }, sessionId)
+  return (evaluated && evaluated.result && evaluated.result.value)
+    || { width: 1024, height: 600 }
+}
+
 const buildPdfOptions = async (client, sessionId, pageStyle) => {
   const base = {
     printBackground: true,
     preferCSSPageSize: false,
-    displayHeaderFooter: false
+    displayHeaderFooter: false,
+    scale: 1
   }
 
   if (pageStyle === 'onePage') {
-    const evaluated = await client.send('Runtime.evaluate', {
-      expression: `(() => {
-        const width = Math.max(
-          document.documentElement.scrollWidth || 0,
-          document.body ? document.body.scrollWidth : 0,
-          1024
-        )
-        const height = Math.max(
-          document.documentElement.scrollHeight || 0,
-          document.body ? document.body.scrollHeight : 0,
-          600
-        )
-        return { width, height }
-      })()`,
-      returnByValue: true
-    }, sessionId)
-    const size = (evaluated && evaluated.result && evaluated.result.value) || { width: 1024, height: 600 }
+    const size = await measureResumeContent(client, sessionId)
+    // +2px buffer avoids a blank second page from sub-pixel / rounding overflow.
+    const widthPx = Math.max(Number(size.width) || 1024, 800)
+    const heightPx = Math.max(Number(size.height) || 600, 600) + 2
     return {
       ...base,
-      paperWidth: Math.max(Number(size.width) || 1024, 1024) / 96,
-      paperHeight: Math.max(Number(size.height) || 600, 600) / 96,
+      paperWidth: widthPx / 96,
+      paperHeight: heightPx / 96,
       marginTop: 0,
       marginBottom: 0,
       marginLeft: 0,
@@ -323,6 +384,7 @@ export const renderUrlToPdf = async ({ input, output, pageStyle = 'clippedPages'
     // Resume pages set window.done after data + layout finish; do not rely on
     // loadEventFired (about:blank / SPA races).
     await waitForWindowDone(client, sessionId, timeoutMs)
+    await preparePageForPrint(client, sessionId)
 
     const pdfOptions = await buildPdfOptions(client, sessionId, pageStyle)
     const pdf = await client.send('Page.printToPDF', pdfOptions, sessionId)
