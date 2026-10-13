@@ -97,6 +97,16 @@
   min-width: 0;
 }
 
+.loginValueTitle {
+  margin: 0 0 10px;
+  color: var(--oc-white);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  text-align: left;
+}
+
 .loginIntro {
   font-size: 1rem;
   color: var(--oc-gray-1);
@@ -105,47 +115,61 @@
 .valueDescription {
   margin: 0;
   font-size: 14px;
-  line-height: 1.7;
-  color: var(--oc-gray-3);
+  line-height: 2;
+  color: var(--oc-gray-4);
 }
 
 .valueCard {
-  flex: 0 1 320px;
+  position: relative;
+  flex: 0 1 400px;
   margin-top: 30px;
-  padding: 24px 26px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 4px;
-  background-color: rgba(24, 24, 24, 0.72);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  padding: 30px 34px 28px;
+  border: 1px solid rgba(94, 168, 116, 0.25);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(38, 48, 42, 0.55) 0%, rgba(16, 20, 18, 0.82) 34%),
+    rgba(12, 15, 13, 0.82);
+  backdrop-filter: blur(6px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 18px 40px rgba(0, 0, 0, 0.4);
   text-align: left;
   pointer-events: auto;
 }
 
-.valueCardTitle {
-  margin-bottom: 12px;
-  color: var(--oc-white);
-  font-size: 17px;
-  line-height: 1.4;
+.valueCard::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(87, 190, 123, 0.65), transparent);
 }
 
 .valuePoints {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  margin-top: 12px;
-  color: var(--oc-gray-5);
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  color: var(--oc-gray-4);
   font-size: 13px;
+  line-height: 1.6;
 }
 
 .valuePoint {
   position: relative;
+  padding-left: 16px;
 }
 
-.valuePoint:not(:first-child)::before {
+.valuePoint::before {
   content: '·';
   position: absolute;
-  left: -12px;
+  left: 0;
   color: var(--oc-green-5);
+  font-weight: 700;
 }
 
 .logo {
