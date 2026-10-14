@@ -532,7 +532,12 @@ class LoginPanel extends React.PureComponent {
             <p className={styles.valueDescription}>{loginText.description}</p>
             <div className={styles.valuePoints}>
               {(loginText.features || []).map((feature, index) => (
-                <span key={index} className={styles.valuePoint}>{feature}</span>
+                <div key={index} className={styles.valuePointItem}>
+                  <span className={styles.valuePointIcon}>
+                    <Icon icon="check" />
+                  </span>
+                  <span className={styles.valuePointText}>{feature}</span>
+                </div>
               ))}
             </div>
           </aside>
