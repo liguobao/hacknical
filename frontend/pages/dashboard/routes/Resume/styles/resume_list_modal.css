@@ -7,7 +7,8 @@
   max-width: 90vw;
   max-height: 85vh;
   border-radius: 2px;
-  overflow: hidden;
+  /* Keep tipso bubbles visible; list scrolling is handled by .listWrapper */
+  overflow: visible;
   display: flex;
   flex-direction: column;
   composes: common-z-index from 'STYLES/common.css';
@@ -59,6 +60,9 @@
   flex-direction: column;
   gap: 12px;
   padding-right: 4px;
+  /* Room for tipso arrows near the first / last rows */
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 
 .item {
@@ -70,6 +74,7 @@
   background-color: var(--oc-white);
   transition: all 0.2s ease;
   gap: 8px;
+  overflow: visible;
 }
 
 .item:hover {
@@ -194,6 +199,8 @@
 }
 
 .itemActions {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: 2px;

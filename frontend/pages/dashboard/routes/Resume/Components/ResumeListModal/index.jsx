@@ -269,6 +269,7 @@ class ResumeListModal extends React.Component {
                         <Tipso
                           trigger="hover"
                           theme="dark"
+                          position="bottom"
                           tipsoContent={(<span>{modalTexts.switchToEdit || '编辑此简历'}</span>)}
                         >
                           <IconButton
@@ -287,6 +288,7 @@ class ResumeListModal extends React.Component {
                         <Tipso
                           trigger="hover"
                           theme="dark"
+                          position="bottom"
                           tipsoContent={(<span>{modalTexts.setDefault || '设为默认'}</span>)}
                         >
                           <IconButton
@@ -302,6 +304,7 @@ class ResumeListModal extends React.Component {
                         <Tipso
                           trigger="hover"
                           theme="dark"
+                          position="bottom"
                           tipsoContent={(<span>{modalTexts.rename || '重命名'}</span>)}
                         >
                           <IconButton
@@ -316,6 +319,7 @@ class ResumeListModal extends React.Component {
                       <Tipso
                         trigger="hover"
                         theme="dark"
+                        position="bottom"
                         tipsoContent={(<span>{modalTexts.copy || '复制简历'}</span>)}
                       >
                         <IconButton
@@ -350,6 +354,7 @@ class ResumeListModal extends React.Component {
                           <Tipso
                             trigger="hover"
                             theme="dark"
+                            position="bottom"
                             tipsoContent={(<span>{modalTexts.delete || '删除'}</span>)}
                           >
                             <IconButton

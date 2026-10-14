@@ -4,8 +4,39 @@
   <link href="{{ assetsPath("assets/resume_desktop.bundle.css") }}" rel="stylesheet" type="text/css">
   {% if fromDownload %}
     <style>
+      /* Flatten the share-page chrome for PDF export: no card shadow / outer margin. */
       html, body {
         background-color: #fff !important;
+        height: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+      }
+      #footer,
+      #loading,
+      #wechat-image {
+        display: none !important;
+      }
+      #resume {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      /* CSS-module class names are hashed; match by substring. */
+      #resume [class*="desktop_container"],
+      #resume [class*="mobile_container"] {
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+      }
+      #resume [class*="container"],
+      #resume [class*="wrapper"] {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
       }
     </style>
   {% endif %}
