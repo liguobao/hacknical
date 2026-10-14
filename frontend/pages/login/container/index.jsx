@@ -495,7 +495,6 @@ class LoginPanel extends React.PureComponent {
         <div className={styles.loginPannel}>
           <div className={styles.loginMain}>
             <LogoText theme="light" className={styles.logo} />
-            <h1 className={styles.loginValueTitle}>{loginText.valueTitle}</h1>
             <div className={styles.loginButtonGroup}>
               <ClassicButton
                 theme="light"
@@ -529,6 +528,7 @@ class LoginPanel extends React.PureComponent {
             </div>
           </div>
           <aside className={styles.valueCard}>
+            <h2 className={styles.valueCardTitle}>{loginText.valueTitle}</h2>
             <p className={styles.valueDescription}>{loginText.description}</p>
             <div className={styles.valuePoints}>
               {(loginText.features || []).map((feature, index) => (
