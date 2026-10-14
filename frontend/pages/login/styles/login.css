@@ -85,64 +85,52 @@
   pointer-events: none;
   width: 80%;
   max-width: 1360px;
-  gap: clamp(40px, 5vw, 88px);
+  gap: clamp(40px, 5vw, 80px);
 }
 
 .loginMain {
   flex: 0 1 auto;
-  max-width: 620px;
+  max-width: 650px;
   min-width: 0;
 }
 
 .loginIntro {
   font-size: 1rem;
   color: var(--oc-gray-1);
-}
-
-.valueCardTitle {
-  margin: 0 0 16px;
-  color: var(--oc-white);
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: -0.015em;
-}
-
-.valueDescription {
-  margin: 0 0 22px;
-  font-size: 15px;
-  line-height: 1.8;
-  color: var(--oc-gray-4);
+  white-space: nowrap;
 }
 
 .valueCard {
   position: relative;
-  flex: 0 1 480px;
+  flex: 0 0 auto;
   width: 100%;
-  max-width: 500px;
-  margin-top: 20px;
-  padding: 34px 38px 32px;
-  border: 1px solid rgba(94, 168, 116, 0.28);
-  border-radius: 10px;
-  background:
-    linear-gradient(180deg, rgba(32, 40, 35, 0.65) 0%, rgba(14, 18, 15, 0.88) 40%),
-    rgba(10, 14, 11, 0.85);
-  backdrop-filter: blur(10px);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 20px 48px rgba(0, 0, 0, 0.45);
+  min-width: 480px;
+  max-width: 540px;
+  margin-top: 15px;
+  padding: 28px 32px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  background-color: rgba(24, 24, 24, 0.65);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
   text-align: left;
   pointer-events: auto;
 }
 
-.valueCard::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  left: 24px;
-  right: 24px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(87, 190, 123, 0.8), transparent);
+.valueCardTitle {
+  margin: 0 0 14px;
+  color: var(--oc-white);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.valueDescription {
+  margin: 0 0 18px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--oc-gray-4);
 }
 
 .valuePoints {
@@ -150,44 +138,34 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 0;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 16px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.14);
 }
 
 .valuePointItem {
   display: flex;
-  align-items: center;
-  padding: 10px 14px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(94, 168, 116, 0.08);
-    border-color: rgba(94, 168, 116, 0.28);
-  }
+  align-items: baseline;
+  color: var(--oc-gray-3);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: nowrap;
 }
 
-.valuePointIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: rgba(94, 168, 116, 0.16);
+.valuePointPrefix {
   color: var(--oc-green-5);
-  font-size: 11px;
-  margin-right: 12px;
+  margin-right: 8px;
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: 700;
+  user-select: none;
   flex-shrink: 0;
 }
 
 .valuePointText {
   color: var(--oc-gray-3);
-  font-size: 14px;
-  line-height: 1.5;
-  letter-spacing: 0.01em;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: nowrap;
 }
 
 .logo {
@@ -279,6 +257,7 @@
   pointer-events: auto;
   cursor: pointer;
   transition: opacity 0.2s;
+  white-space: nowrap;
 
   & span {
     font-size: 3.5em;
@@ -366,7 +345,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 28px;
+    gap: 24px;
   }
 
   .loginMain {
@@ -380,20 +359,31 @@
   .valueCard {
     flex-basis: auto;
     width: 100%;
+    min-width: 0;
     box-sizing: border-box;
     margin-top: 0;
-    padding: 26px 22px 24px;
+    padding: 24px 22px 20px;
     text-align: left;
   }
 
   .valueCardTitle {
-    font-size: 22px;
-    margin-bottom: 12px;
+    font-size: 20px;
+    margin-bottom: 10px;
+    white-space: normal;
+  }
+
+  .valuePointItem {
+    white-space: normal;
   }
 
   .valueDescription {
-    font-size: 14px;
-    margin-bottom: 18px;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  .loginButtonGroup {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .statistic {
@@ -445,8 +435,8 @@
   flex-direction: row;
   align-items: center;
   gap: 15px;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
   pointer-events: auto;
   margin-top: 20px;
   margin-bottom: 20px;
