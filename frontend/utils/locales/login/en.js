@@ -7,6 +7,8 @@ const datas = {
   },
   login: {
     loginButton: 'Login by GitHub',
+    zhihuLoginButton: 'Login by Zhihu',
+    googleLoginButton: 'Login by Google',
     loginText: 'Build your online resume in minutes',
     valueTitle: 'More than a resume — a digital profile that keeps evolving',
     description: 'No templates, no layout struggles. Your experience, GitHub projects, and online work are the best resume content.',

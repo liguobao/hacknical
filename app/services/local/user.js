@@ -710,6 +710,157 @@ const copyResume = async (userId, login, resumeId, title) => {
   })
 }
 
+const generateUniqueLogin = (seed = 'user', preferredPrefix = '') => {
+  let base = (seed || '').trim().toLowerCase()
+    .replace(/[^a-z0-9_-]/g, '')
+    .slice(0, 20)
+  if (!base || base.length < 3) {
+    base = preferredPrefix ? `${preferredPrefix}_${randomUUID().replace(/-/g, '').slice(0, 8)}` : `u_${randomUUID().replace(/-/g, '').slice(0, 8)}`
+  }
+  let candidate = base
+  let counter = 1
+  while (true) {
+    if (!RESERVED_USERNAMES.has(candidate.toLowerCase())) {
+      const existing = db.prepare('SELECT user_id FROM users WHERE lower(github_login) = lower(?)').get(candidate)
+      if (!existing) return candidate
+    }
+    candidate = `${base}_${counter}`
+    counter += 1
+  }
+}
+
+const findOAuthIdentity = (provider, providerUserId) => {
+  if (!provider || !providerUserId) return null
+  return db.prepare('SELECT * FROM oauth_identities WHERE provider = ? AND provider_user_id = ?').get(String(provider), String(providerUserId))
+}
+
+const saveOAuthUser = async ({ provider, profile = {}, token = '', expiresAt = null } = {}) => {
+  const providerUserId = String(profile.open_id || '')
+  if (!provider || !providerUserId) {
+    throw new Error('OAuth provider and open_id are required')
+  }
+
+  const identityRow = findOAuthIdentity(provider, providerUserId)
+  const timestamp = now()
+
+  if (identityRow) {
+    const userRow = db.prepare('SELECT * FROM users WHERE user_id = ?').get(identityRow.user_id)
+    if (userRow) {
+      const existingData = parseJson(userRow.data, {})
+      const updatedData = {
+        ...existingData,
+        avatar_url: profile.avatar_url || existingData.avatar_url || '',
+        headline: profile.headline || existingData.headline || '',
+        userName: profile.name || existingData.userName || userRow.github_login
+      }
+      db.prepare('UPDATE users SET data = ?, updated_at = ? WHERE user_id = ?').run(
+        stringifyJson(updatedData), timestamp, userRow.user_id
+      )
+      db.prepare('UPDATE oauth_identities SET data = ?, updated_at = ? WHERE id = ?').run(
+        stringifyJson({ profile, token, expiresAt }), timestamp, identityRow.id
+      )
+      return getUser({ userId: userRow.user_id })
+    }
+  }
+
+  // Check if an existing account with the same verified email can be bound (e.g. for Google)
+  let boundUserId = null
+  let existingUserRow = null
+  if (provider === 'google' && profile.email) {
+    const byEmail = db.prepare('SELECT * FROM users WHERE lower(email) = lower(?)').get(String(profile.email).trim())
+    if (byEmail) {
+      const existingIdentity = db.prepare('SELECT id FROM oauth_identities WHERE user_id = ? AND provider = "google"').get(byEmail.user_id)
+      if (!existingIdentity) {
+        boundUserId = byEmail.user_id
+        existingUserRow = byEmail
+      }
+    }
+  }
+
+  if (boundUserId && existingUserRow) {
+    const identityId = randomUUID()
+    runTransaction(() => {
+      db.prepare(`
+        INSERT INTO oauth_identities (id, user_id, provider, provider_user_id, provider_login, data, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        identityId,
+        boundUserId,
+        provider,
+        providerUserId,
+        profile.account || profile.email || '',
+        stringifyJson({ profile, token, expiresAt }),
+        timestamp,
+        timestamp
+      )
+      const existingData = parseJson(existingUserRow.data, {})
+      const updatedData = {
+        ...existingData,
+        avatar_url: profile.avatar_url || existingData.avatar_url || '',
+        headline: profile.headline || existingData.headline || '',
+        userName: existingData.userName || profile.name || existingUserRow.github_login
+      }
+      db.prepare('UPDATE users SET data = ?, updated_at = ? WHERE user_id = ?').run(
+        stringifyJson(updatedData), timestamp, boundUserId
+      )
+    })
+    return getUser({ userId: boundUserId })
+  }
+
+  // Create new user
+  const seed = (provider === 'google' && profile.email)
+    ? profile.email.split('@')[0]
+    : (profile.account || (profile.email ? profile.email.split('@')[0] : '') || profile.name || provider)
+  const login = generateUniqueLogin(seed, provider)
+  const userId = randomUUID()
+  const identityId = randomUUID()
+  const email = profile.email ? String(profile.email).trim().toLowerCase() : ''
+
+  const userData = {
+    userName: profile.name || login,
+    login,
+    email: email || '',
+    avatar_url: profile.avatar_url || '',
+    headline: profile.headline || '',
+    githubShare: false,
+    openShare: true,
+    initialed: true
+  }
+
+  runTransaction(() => {
+    db.prepare(`
+      INSERT INTO users (user_id, github_login, email, auth_provider, data, initialed, github_share, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?)
+    `).run(
+      userId,
+      login,
+      email || null,
+      provider,
+      stringifyJson(userData),
+      timestamp,
+      timestamp
+    )
+
+    db.prepare(`
+      INSERT INTO oauth_identities (id, user_id, provider, provider_user_id, provider_login, data, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      identityId,
+      userId,
+      provider,
+      providerUserId,
+      profile.account || profile.email || '',
+      stringifyJson({ profile, token, expiresAt }),
+      timestamp,
+      timestamp
+    )
+
+    createResume(userId, login)
+  })
+
+  return getUser({ userId })
+}
+
 export default {
   getUser,
   createUser,
@@ -731,5 +882,7 @@ export default {
   deleteResume,
   renameResume,
   copyResume,
-  toggleResumeShare
+  toggleResumeShare,
+  findOAuthIdentity,
+  saveOAuthUser
 }

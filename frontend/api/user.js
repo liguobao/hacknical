@@ -15,6 +15,7 @@ const loginByLocal = data => API.post('/user/login/local', data)
 const markNotifies = messageIds => API.patch('/user/notifies', { messageIds })
 const getNotifies = () => API.get('/user/notifies')
 const voteNotify = (messageId, data) => API.patch(`/user/notifies/${messageId}`, data)
+const getOAuthStatus = () => API.get('/user/oauth/status')
 
 export default {
   logout,
@@ -24,6 +25,7 @@ export default {
   getUserInfo,
   patchUserInfo,
   getGitHubSections,
+  getOAuthStatus,
   // notify
   markNotifies,
   getNotifies,

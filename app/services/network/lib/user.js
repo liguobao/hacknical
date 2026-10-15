@@ -109,3 +109,13 @@ export const toggleResumeShare = data => ({
   url: '/resume/share'
 })
 
+export const findOAuthIdentity = (provider, providerUserId) => ({
+  qs: { provider, providerUserId },
+  url: '/user/oauth/identity'
+})
+
+export const saveOAuthUser = data => ({
+  body: data,
+  method: 'post',
+  url: '/user/oauth/save'
+})

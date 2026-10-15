@@ -10,5 +10,23 @@
       "redirectUri": "GITHUB_OAUTH_REDIRECT_URI"
     }
   },
+  "zhihu": {
+    "oauth": {
+      "appId": "ZHIHU_OAUTH_APP_ID",
+      "appKey": "ZHIHU_OAUTH_APP_KEY",
+      "redirectUri": "ZHIHU_OAUTH_REDIRECT_URI",
+      "authorizeUrl": "ZHIHU_OAUTH_AUTHORIZE_URL",
+      "accessTokenUrl": "ZHIHU_OAUTH_ACCESS_TOKEN_URL",
+      "meUrl": "ZHIHU_OAUTH_ME_URL",
+      "scope": "ZHIHU_OAUTH_SCOPE"
+    }
+  },
+  "google": {
+    "oauth": {
+      "clientId": "GOOGLE_OAUTH_CLIENT_ID",
+      "clientSecret": "GOOGLE_OAUTH_CLIENT_SECRET",
+      "redirectUri": "GOOGLE_OAUTH_REDIRECT_URI"
+    }
+  },
   "log": { "level": "LOG_LEVEL" }
 }

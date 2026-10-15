@@ -5,6 +5,8 @@ import logger from '../utils/logger'
 import notify from '../services/notify'
 import { randomBytes, timingSafeEqual } from 'node:crypto'
 import * as githubOAuth from '../services/github-oauth'
+import * as zhihuOAuth from '../services/zhihu-oauth'
+import * as googleOAuth from '../services/google-oauth'
 import { isGitHubSession } from '../utils/helper'
 import { SESSION_MAX_AGE } from '../utils/constant'
 
@@ -183,6 +185,146 @@ const loginByLocal = async (ctx) => {
   }
 }
 
+const startZhihuLogin = async (ctx) => {
+  ctx.set('Cache-Control', 'no-store')
+  if (!zhihuOAuth.isConfigured()) {
+    ctx.status = 503
+    ctx.body = {
+      success: false,
+      code: 'ZHIHU_OAUTH_UNAVAILABLE',
+      message: '知乎登录尚未配置，请设置 ZHIHU_OAUTH_APP_ID 和 ZHIHU_OAUTH_APP_KEY。'
+    }
+    return
+  }
+  const state = randomBytes(32).toString('hex')
+  ctx.session.zhihuOAuth = { state, createdAt: Date.now() }
+  ctx.redirect(zhihuOAuth.authorizationUrl(state))
+}
+
+const loginByZhihu = async (ctx) => {
+  ctx.set('Cache-Control', 'no-store')
+  const { code, state, error } = ctx.request.query
+  const pending = ctx.session.zhihuOAuth
+  delete ctx.session.zhihuOAuth
+
+  const expected = pending && pending.state
+  const validState = typeof state === 'string' && typeof expected === 'string'
+    && Buffer.byteLength(state) === Buffer.byteLength(expected)
+    && timingSafeEqual(Buffer.from(state), Buffer.from(expected))
+  const age = pending && Date.now() - pending.createdAt
+  if (!validState || age < 0 || age > 10 * 60 * 1000 || !Number.isFinite(age)) {
+    ctx.status = 400
+    ctx.body = { success: false, code: 'INVALID_OAUTH_STATE', message: '登录验证已失效，请返回首页重新登录。' }
+    return
+  }
+  if (error || typeof code !== 'string' || !code) {
+    return ctx.redirect('/?messageCode=zhihu&messageType=error')
+  }
+
+  try {
+    const { accessToken, expiresAt, profile } = await zhihuOAuth.exchangeCode(code)
+    const user = await network.user.saveOAuthUser({
+      provider: 'zhihu',
+      profile,
+      token: accessToken,
+      expiresAt
+    })
+    ctx.session = {
+      locale: (ctx.session && ctx.session.locale) || 'zh-CN',
+      userId: user.userId,
+      githubToken: `zhihu:${user.userId}`,
+      githubLogin: user.githubLogin,
+      githubAvator: user.avatar_url || profile.avatar_url || '',
+      login: user.githubLogin,
+      authProvider: 'zhihu'
+    }
+    ctx.session.maxAge = SESSION_MAX_AGE
+    await ctx.session.regenerate()
+    logger.info(`[ZHIHU:LOGIN] ${user.githubLogin}`)
+    return ctx.redirect(`/${user.githubLogin}`)
+  } catch (err) {
+    logger.error('[ZHIHU:LOGIN] OAuth exchange or user creation failed')
+    return ctx.redirect('/?messageCode=zhihu&messageType=error')
+  }
+}
+
+const startGoogleLogin = async (ctx) => {
+  ctx.set('Cache-Control', 'no-store')
+  if (!googleOAuth.isConfigured()) {
+    ctx.status = 503
+    ctx.body = {
+      success: false,
+      code: 'GOOGLE_OAUTH_UNAVAILABLE',
+      message: 'Google 登录尚未配置，请设置 GOOGLE_OAUTH_CLIENT_ID 和 GOOGLE_OAUTH_CLIENT_SECRET。'
+    }
+    return
+  }
+  const state = randomBytes(32).toString('hex')
+  ctx.session.googleOAuth = { state, createdAt: Date.now() }
+  ctx.redirect(googleOAuth.authorizationUrl(state))
+}
+
+const loginByGoogle = async (ctx) => {
+  ctx.set('Cache-Control', 'no-store')
+  const { code, state, error } = ctx.request.query
+  const pending = ctx.session.googleOAuth
+  delete ctx.session.googleOAuth
+
+  const expected = pending && pending.state
+  const validState = typeof state === 'string' && typeof expected === 'string'
+    && Buffer.byteLength(state) === Buffer.byteLength(expected)
+    && timingSafeEqual(Buffer.from(state), Buffer.from(expected))
+  const age = pending && Date.now() - pending.createdAt
+  if (!validState || age < 0 || age > 10 * 60 * 1000 || !Number.isFinite(age)) {
+    ctx.status = 400
+    ctx.body = { success: false, code: 'INVALID_OAUTH_STATE', message: '登录验证已失效，请返回首页重新登录。' }
+    return
+  }
+  if (error || typeof code !== 'string' || !code) {
+    return ctx.redirect('/?messageCode=google&messageType=error')
+  }
+
+  try {
+    const { accessToken, expiresAt, profile } = await googleOAuth.exchangeCode(code)
+    const user = await network.user.saveOAuthUser({
+      provider: 'google',
+      profile,
+      token: accessToken,
+      expiresAt
+    })
+    ctx.session = {
+      locale: (ctx.session && ctx.session.locale) || 'zh-CN',
+      userId: user.userId,
+      githubToken: `google:${user.userId}`,
+      githubLogin: user.githubLogin,
+      githubAvator: user.avatar_url || profile.avatar_url || '',
+      login: user.githubLogin,
+      email: user.email || profile.email || '',
+      authProvider: 'google'
+    }
+    ctx.session.maxAge = SESSION_MAX_AGE
+    await ctx.session.regenerate()
+    logger.info(`[GOOGLE:LOGIN] ${user.githubLogin}`)
+    return ctx.redirect(`/${user.githubLogin}`)
+  } catch (err) {
+    logger.error('[GOOGLE:LOGIN] OAuth exchange or user creation failed')
+    return ctx.redirect('/?messageCode=google&messageType=error')
+  }
+}
+
+const getOAuthStatus = async (ctx) => {
+  ctx.set('Cache-Control', 'no-store')
+  ctx.body = {
+    success: true,
+    result: {
+      github: githubOAuth.isConfigured(),
+      zhihu: zhihuOAuth.isConfigured(),
+      google: googleOAuth.isConfigured()
+    }
+  }
+}
+
+
 const initialFinished = async (ctx) => {
   const { userId } = ctx.session
 
@@ -303,6 +445,11 @@ export default {
   // login
   startGitHubLogin,
   loginByGitHub,
+  startZhihuLogin,
+  loginByZhihu,
+  startGoogleLogin,
+  loginByGoogle,
+  getOAuthStatus,
   signup,
   loginByLocal
 }

@@ -48,8 +48,13 @@ export const getValue = (object, key) => {
 
 export const isGitHubSession = (session = {}) => {
   if (!session) return false
-  if (session.authProvider === 'local') return false
+  if (session.authProvider && session.authProvider !== 'github') return false
   if (session.authProvider === 'github') return true
   const token = session.githubToken
-  return Boolean(token && !String(token).startsWith('local:'))
+  return Boolean(
+    token &&
+    !String(token).startsWith('local:') &&
+    !String(token).startsWith('zhihu:') &&
+    !String(token).startsWith('google:')
+  )
 }

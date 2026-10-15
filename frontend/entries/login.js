@@ -12,6 +12,8 @@ $(() => {
 
   renderApp('login', {
     loginLink: window.loginLink,
+    zhihuLoginLink: window.zhihuLoginLink,
+    googleLoginLink: window.googleLoginLink,
     isMobile: window.isMobile === 'true' || window.isMobile === true
   })
 })

@@ -30,6 +30,8 @@
 {% block js %}
   <script>
     window.loginLink = "{{ loginLink }}".replaceAll("&amp;", "&");
+    window.zhihuLoginLink = "{{ zhihuLoginLink }}".replaceAll("&amp;", "&");
+    window.googleLoginLink = "{{ googleLoginLink }}".replaceAll("&amp;", "&");
   </script>
   <script async defer src="{{ assetsPath("assets/login.bundle.js") }}"></script>
 {% endblock %}

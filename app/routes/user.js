@@ -53,6 +53,31 @@ router.get(
   User.loginByGitHub
 )
 
+router.get(
+  '/login/zhihu',
+  User.startZhihuLogin
+)
+
+router.get(
+  '/login/zhihu/callback',
+  User.loginByZhihu
+)
+
+router.get(
+  '/login/google',
+  User.startGoogleLogin
+)
+
+router.get(
+  '/login/google/callback',
+  User.loginByGoogle
+)
+
+router.get(
+  '/oauth/status',
+  User.getOAuthStatus
+)
+
 router.post(
   '/signup',
   User.signup

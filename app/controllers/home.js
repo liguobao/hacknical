@@ -16,10 +16,14 @@ const renderLandingPage = async (ctx) => {
   cacheControl(ctx)
 
   const loginLink = '/api/user/login/github'
+  const zhihuLoginLink = '/api/user/login/zhihu'
+  const googleLoginLink = '/api/user/login/google'
   const { messageCode, messageType } = ctx.request.query
 
   await ctx.render('user/login', {
     loginLink,
+    zhihuLoginLink,
+    googleLoginLink,
     messageCode,
     messageType,
     title: ctx.__('loginPage.title')

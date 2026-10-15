@@ -21,6 +21,24 @@
       "redirectUri": ""
     }
   },
+  "zhihu": {
+    "oauth": {
+      "appId": "",
+      "appKey": "",
+      "redirectUri": "",
+      "authorizeUrl": "https://openapi.zhihu.com/authorize",
+      "accessTokenUrl": "https://openapi.zhihu.com/access_token",
+      "meUrl": "https://openapi.zhihu.com/user",
+      "scope": ""
+    }
+  },
+  "google": {
+    "oauth": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectUri": ""
+    }
+  },
   "links": {
     "github": "https://github.com/ecmadao/hacknical",
     "issue": "https://github.com/ecmadao/hacknical/issues",

@@ -37,7 +37,8 @@ class LoginPanel extends React.PureComponent {
       loginAccount: '',
       loginPassword: '',
       submitting: false,
-      errorMsg: ''
+      errorMsg: '',
+      oauthConfig: { github: true, zhihu: true, google: true }
     }
     this.heartBeat = null
     this.getStatistic = this.getStatistic.bind(this)
@@ -159,6 +160,13 @@ class LoginPanel extends React.PureComponent {
 
   componentDidMount() {
     this.getLanguages()
+    if (API.user.getOAuthStatus) {
+      API.user.getOAuthStatus().then(res => {
+        if (res && res.result) {
+          this.setState({ oauthConfig: res.result })
+        }
+      }).catch(() => {})
+    }
     this.heartBeat = new HeartBeat({
       interval: 1000 * 60 * 2, // 2 min
       callback: () => this.getStatistic()
@@ -472,7 +480,10 @@ class LoginPanel extends React.PureComponent {
   }
 
   render() {
-    const { loginLink } = this.props
+    const { loginLink, zhihuLoginLink, googleLoginLink } = this.props
+    const { oauthConfig = {} } = this.state
+    const zhihuUrl = zhihuLoginLink || '/api/user/login/zhihu'
+    const googleUrl = googleLoginLink || '/api/user/login/google'
 
     return (
       <div>
@@ -510,6 +521,20 @@ class LoginPanel extends React.PureComponent {
                   {loginText.loginButton}
                 </a>
               </ClassicButton>
+              <a
+                href={zhihuUrl}
+                className={cx(styles.oauthActionBtn, styles.zhihuBtn)}
+              >
+                <span className={styles.zhihuIcon}>知</span>
+                {loginText.zhihuLoginButton || '通过知乎登录'}
+              </a>
+              <a
+                href={googleUrl}
+                className={cx(styles.oauthActionBtn, styles.googleBtn)}
+              >
+                <Icon icon="google" />
+                {loginText.googleLoginButton || '通过 Google 登录'}
+              </a>
               <div
                 className={styles.subActionBtn}
                 onClick={() => this.openModal('login')}

@@ -120,6 +120,20 @@ db.exec(`
     used_at TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_invite_code_uses_code ON invite_code_uses (code);
+
+  CREATE TABLE IF NOT EXISTS oauth_identities (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    provider TEXT NOT NULL,
+    provider_user_id TEXT NOT NULL,
+    provider_login TEXT,
+    data TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE(provider, provider_user_id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_oauth_identities_user ON oauth_identities (user_id);
+  CREATE INDEX IF NOT EXISTS idx_oauth_identities_provider ON oauth_identities (provider, provider_user_id);
 `)
 
 // Migrate users table columns if not present

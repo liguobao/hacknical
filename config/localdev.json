@@ -20,6 +20,20 @@
       "clientSecret": ""
     }
   },
+  "zhihu": {
+    "oauth": {
+      "appId": "",
+      "appKey": "",
+      "redirectUri": "http://localhost:4000/api/user/login/zhihu/callback"
+    }
+  },
+  "google": {
+    "oauth": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectUri": "http://localhost:4000/api/user/login/google/callback"
+    }
+  },
   "services": {
     "redis": {
       "host": "127.0.0.1",

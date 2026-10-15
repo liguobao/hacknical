@@ -7,6 +7,8 @@ const datas = {
   },
   login: {
     loginButton: '通过 GitHub 登录',
+    zhihuLoginButton: '通过知乎登录',
+    googleLoginButton: '通过 Google 登录',
     loginText: '几分钟，构建你的在线简历',
     valueTitle: '不止一份简历，更是持续迭代的数字名片',
     description: '无需折腾模板与排版，你的经历、GitHub 项目、在线作品就是最好的简历内容。',
