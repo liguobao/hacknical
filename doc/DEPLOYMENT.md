@@ -49,7 +49,9 @@ Google Cloud 项目显示名称和 OAuth 应用名称均为 **Hackneo**，项目
 
 可选仓库 Variable：`HACKNICAL_GOOGLE_OAUTH_REDIRECT_URI`。未指定时部署脚本根据 `APP_URL` 自动生成上述回调。凭据仅保存在 Secrets 和服务器 `.env`，不要写进仓库、镜像或文档。
 
-应用处于“正在测试”时，按控制台要求添加测试用户；正式开放前在“目标对象”页面切换至生产环境，并完成控制台要求的验证。完成部署后访问 `/api/user/oauth/status` 确认 `google: true`，然后从 `/api/user/login/google` 完成一次真实登录。
+当前只请求 `openid email profile`，属于 [Google 文档说明的基本身份范围例外](https://support.google.com/cloud/answer/15549945#publishing-status-testing)：即使应用处于“正在测试”，用户也不需要加入测试用户列表，不会看到测试应用警告，也不受测试授权 7 天过期规则限制。若后续增加其他权限，需要重新检查测试用户、发布及验证要求。当前控制台仍为测试状态；切换生产状态前需补全品牌页面要求的信息。
+
+完成部署后访问 `/api/user/oauth/status` 确认 `google: true`，然后从 `/api/user/login/google` 完成一次真实登录。Google 凭据已保存到仓库 Secrets，临时凭据文件在上传后删除。
 
 ## 知乎登录申请
 
