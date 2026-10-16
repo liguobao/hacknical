@@ -1,4 +1,4 @@
-# GitHub 登录与自动部署
+# 第三方登录与自动部署
 
 线上地址：<https://hackneo.cn>。SSH 自动部署沿用服务器上已有的项目目录 `/var/lib/dsh/workspace/hacknical`，端口为 `127.0.0.1:4000`，Nginx 负责 HTTPS。数据库、上传资源和日志分别位于 `data/`、`public/uploads/`、`log/`，发布不会删除这些目录。旧域名 `hack.r2049.cn` 的 HTTP / HTTPS 请求会以 301 跳转到新域名，保留路径和查询参数。
 
@@ -27,6 +27,39 @@ Delete old files from `public/downloads/` after deployment. Apply `doc/nginx/hac
 OAuth App 创建前，服务器 `.env` 保留空值，登录返回 `503 GITHUB_OAUTH_UNAVAILABLE`。不能完成真实 GitHub 授权，但网站和部署流程可以正常工作。空的工作流 secret 不会覆盖服务器上已配置的非空凭据。
 
 域名迁移时，在已有 OAuth App 的设置页同时更新 Homepage URL 和 Authorization callback URL；Client ID 和 Client Secret 沿用原值。GitHub 账户页面的回调地址必须与服务器配置一致。新域名不会继承旧域名的登录 cookie，需要重新登录。
+
+## Google 登录
+
+Google Cloud 项目显示名称和 OAuth 应用名称均为 **Hackneo**，项目 ID 为 `hacknical`（Google 不支持修改已创建的项目 ID）。在 [Google Auth Platform](https://console.cloud.google.com/auth/overview?project=hacknical) 管理配置。
+
+创建 Web 应用类型的 OAuth 客户端，名称为 `Hackneo Web`：
+
+| 字段 | 值 |
+| --- | --- |
+| 应用首页 | `https://hackneo.cn` |
+| 已获授权的网域 | `hackneo.cn` |
+| 已获授权的重定向 URI | `https://hackneo.cn/api/user/login/google/callback` |
+
+当前采用服务端授权码流程，不需要配置 JavaScript 来源。请求范围为 `openid email profile`，用于识别 Google 账号、邮箱及基本资料。服务端要求邮箱已验证，并校验一次性的 OAuth state。
+
+创建后把 Client ID 和 Client Secret 分别保存到仓库 Actions Secrets：
+
+- `HACKNICAL_GOOGLE_OAUTH_CLIENT_ID`
+- `HACKNICAL_GOOGLE_OAUTH_CLIENT_SECRET`
+
+可选仓库 Variable：`HACKNICAL_GOOGLE_OAUTH_REDIRECT_URI`。未指定时部署脚本根据 `APP_URL` 自动生成上述回调。凭据仅保存在 Secrets 和服务器 `.env`，不要写进仓库、镜像或文档。
+
+应用处于“正在测试”时，按控制台要求添加测试用户；正式开放前在“目标对象”页面切换至生产环境，并完成控制台要求的验证。完成部署后访问 `/api/user/oauth/status` 确认 `google: true`，然后从 `/api/user/login/google` 完成一次真实登录。
+
+## 知乎登录申请
+
+申请时填写 Callback：
+
+```text
+https://hackneo.cn/api/user/login/zhihu/callback
+```
+
+申请通过后，在仓库 Actions Secrets 保存 `HACKNICAL_ZHIHU_OAUTH_APP_ID` 和 `HACKNICAL_ZHIHU_OAUTH_APP_KEY`，然后重新部署。可选 Variable 为 `HACKNICAL_ZHIHU_OAUTH_REDIRECT_URI`；未指定时根据 `APP_URL` 自动生成回调。空的 Secrets 不会覆盖服务器已有凭据。
 
 ## GitHub Actions 配置
 

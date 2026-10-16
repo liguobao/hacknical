@@ -56,7 +56,7 @@ $ npm run start-local
 
 在 [GitHub OAuth App](https://github.com/settings/applications/new) 注册本地应用，Homepage URL 填 `http://localhost:4000`，Authorization callback URL 填 `http://localhost:4000/api/user/login/github/callback`。登录直接调用 GitHub OAuth，不需要额外的 GitHub server 或 Auth0。
 
-线上地址为 <https://hackneo.cn>。GitHub Actions 会构建镜像、推送 GHCR 并通过 SSH 更新服务；OAuth App 尚未配置时保留空凭据，登录返回配置提示。完整的仓库 secret/variable 清单与操作步骤见 [GitHub 登录与部署文档](DEPLOYMENT.md)。
+线上地址为 <https://hackneo.cn>。GitHub Actions 会构建镜像、推送 GHCR 并通过 SSH 更新服务；OAuth App 尚未配置时保留空凭据，登录返回配置提示。GitHub、Google、知乎的回调地址及仓库 secret/variable 清单见 [第三方登录与部署文档](DEPLOYMENT.md)。
 
 生产环境仍可通过 `config/production.json` 覆盖存储配置；环境变量优先。SQLite 和上传目录在发布时保留。
 

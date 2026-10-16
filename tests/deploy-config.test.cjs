@@ -13,6 +13,7 @@ test('deployment preserves signing key, existing OAuth secrets and production co
     fs.copyFileSync('scripts/configure-deploy.py', path.join(root, 'scripts/configure-deploy.py'))
     fs.copyFileSync('config/production.example.json', path.join(root, 'config/production.example.json'))
     const env = { ...process.env, APP_URL: 'https://hackneo.cn', APP_KEY: '', GITHUB_OAUTH_CLIENT_ID: '', GITHUB_OAUTH_CLIENT_SECRET: '', GITHUB_OAUTH_REDIRECT_URI: '' }
+    for (const key of ['GOOGLE_OAUTH_CLIENT_ID', 'GOOGLE_OAUTH_CLIENT_SECRET', 'GOOGLE_OAUTH_REDIRECT_URI', 'ZHIHU_OAUTH_APP_ID', 'ZHIHU_OAUTH_APP_KEY', 'ZHIHU_OAUTH_REDIRECT_URI']) env[key] = ''
     const run = extra => spawnSync('python3', [path.join(root, 'scripts/configure-deploy.py')], { env: { ...env, ...extra }, encoding: 'utf8' })
     const read = () => Object.fromEntries(fs.readFileSync(path.join(root, '.env'), 'utf8').trim().split('\n').map(line => {
       const at = line.indexOf('=')
@@ -23,14 +24,26 @@ test('deployment preserves signing key, existing OAuth secrets and production co
     assert.match(initial.APP_KEY, /^[a-f\d]{64}$/)
     assert.equal(initial.GITHUB_OAUTH_CLIENT_ID, '')
     assert.equal(initial.GITHUB_OAUTH_REDIRECT_URI, 'https://hackneo.cn/api/user/login/github/callback')
+    assert.equal(initial.GOOGLE_OAUTH_REDIRECT_URI, 'https://hackneo.cn/api/user/login/google/callback')
+    assert.equal(initial.ZHIHU_OAUTH_REDIRECT_URI, 'https://hackneo.cn/api/user/login/zhihu/callback')
     assert.equal(fs.statSync(path.join(root, '.env')).mode & 0o777, 0o600)
     const production = fs.readFileSync(path.join(root, 'config/production.json'), 'utf8')
-    const changed = run({ GITHUB_OAUTH_CLIENT_ID: 'real-client', GITHUB_OAUTH_CLIENT_SECRET: 'private-secret' })
+    const changed = run({
+      GITHUB_OAUTH_CLIENT_ID: 'real-client', GITHUB_OAUTH_CLIENT_SECRET: 'private-secret',
+      GOOGLE_OAUTH_CLIENT_ID: 'google-client', GOOGLE_OAUTH_CLIENT_SECRET: 'google-secret',
+      ZHIHU_OAUTH_APP_ID: 'zhihu-app', ZHIHU_OAUTH_APP_KEY: 'zhihu-key'
+    })
     assert.equal(changed.status, 0)
     assert.ok(!changed.stdout.includes('private-secret'))
+    assert.ok(!changed.stdout.includes('google-secret'))
+    assert.ok(!changed.stdout.includes('zhihu-key'))
     assert.equal(run({}).status, 0)
     assert.equal(read().APP_KEY, initial.APP_KEY)
     assert.equal(read().GITHUB_OAUTH_CLIENT_SECRET, 'private-secret')
+    assert.equal(read().GOOGLE_OAUTH_CLIENT_ID, 'google-client')
+    assert.equal(read().GOOGLE_OAUTH_CLIENT_SECRET, 'google-secret')
+    assert.equal(read().ZHIHU_OAUTH_APP_ID, 'zhihu-app')
+    assert.equal(read().ZHIHU_OAUTH_APP_KEY, 'zhihu-key')
     assert.equal(fs.readFileSync(path.join(root, 'config/production.json'), 'utf8'), production)
     assert.equal(run({ APP_URL: 'https://hackneo.cn' }).status, 0)
     assert.equal(read().APP_URL, 'https://hackneo.cn')
@@ -40,9 +53,17 @@ test('deployment preserves signing key, existing OAuth secrets and production co
     assert.equal(run({ APP_URL: 'https://hackneo.cn', GITHUB_OAUTH_REDIRECT_URI: 'https://auth.example/callback' }).status, 0)
     assert.equal(run({ APP_URL: 'https://hackneo.cn' }).status, 0)
     assert.equal(read().GITHUB_OAUTH_REDIRECT_URI, 'https://auth.example/callback')
+    assert.equal(run({ APP_URL: 'https://new.example', GOOGLE_OAUTH_REDIRECT_URI: 'https://auth.example/google' }).status, 0)
+    assert.equal(read().ZHIHU_OAUTH_REDIRECT_URI, 'https://new.example/api/user/login/zhihu/callback')
+    assert.equal(read().GITHUB_OAUTH_REDIRECT_URI, 'https://auth.example/callback')
+    assert.equal(run({}).status, 0)
+    assert.equal(read().GOOGLE_OAUTH_REDIRECT_URI, 'https://auth.example/google')
+    assert.equal(read().ZHIHU_OAUTH_REDIRECT_URI, 'https://hackneo.cn/api/user/login/zhihu/callback')
     const previous = fs.readFileSync(path.join(root, '.env'), 'utf8')
     assert.notEqual(run({ APP_URL: 'http://invalid.example' }).status, 0)
     assert.notEqual(run({ GITHUB_OAUTH_CLIENT_SECRET: 'first\nSECOND=bad' }).status, 0)
+    assert.notEqual(run({ GOOGLE_OAUTH_CLIENT_SECRET: 'first\nSECOND=bad' }).status, 0)
+    assert.notEqual(run({ ZHIHU_OAUTH_APP_KEY: 'first\nSECOND=bad' }).status, 0)
     assert.equal(fs.readFileSync(path.join(root, '.env'), 'utf8'), previous)
   } finally { fs.rmSync(root, { recursive: true, force: true }) }
 })

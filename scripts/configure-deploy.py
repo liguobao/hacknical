@@ -23,23 +23,32 @@ if env_file.exists():
                 values[key] = value.strip().strip("'\"")
 
 previous_url = values.get('APP_URL', '').rstrip('/')
-previous_redirect = values.get('GITHUB_OAUTH_REDIRECT_URI', '')
+providers = {
+    'github': ('GITHUB_OAUTH_CLIENT_ID', 'GITHUB_OAUTH_CLIENT_SECRET'),
+    'google': ('GOOGLE_OAUTH_CLIENT_ID', 'GOOGLE_OAUTH_CLIENT_SECRET'),
+    'zhihu': ('ZHIHU_OAUTH_APP_ID', 'ZHIHU_OAUTH_APP_KEY'),
+}
+oauth_keys = [key for keys in providers.values() for key in keys]
+oauth_keys += [name.upper() + '_OAUTH_REDIRECT_URI' for name in providers]
+previous_redirects = {name: values.get(name.upper() + '_OAUTH_REDIRECT_URI', '')
+                      for name in providers}
 
-for key in ('APP_URL', 'APP_KEY', 'GITHUB_OAUTH_CLIENT_ID',
-            'GITHUB_OAUTH_CLIENT_SECRET', 'GITHUB_OAUTH_REDIRECT_URI'):
+for key in ['APP_URL', 'APP_KEY'] + oauth_keys:
     if os.environ.get(key):
         values[key] = os.environ[key]
 
 url = urlparse(values.get('APP_URL', ''))
 if url.scheme != 'https' or not url.netloc or url.path not in ('', '/'):
     raise SystemExit('APP_URL must be the public HTTPS origin')
-if not os.environ.get('GITHUB_OAUTH_REDIRECT_URI') and (
-        not previous_redirect or previous_redirect ==
-        previous_url + '/api/user/login/github/callback'):
-    values['GITHUB_OAUTH_REDIRECT_URI'] = (
-        values['APP_URL'].rstrip('/') + '/api/user/login/github/callback')
-values.setdefault('GITHUB_OAUTH_CLIENT_ID', '')
-values.setdefault('GITHUB_OAUTH_CLIENT_SECRET', '')
+for name, credential_keys in providers.items():
+    redirect_key = name.upper() + '_OAUTH_REDIRECT_URI'
+    callback_path = f'/api/user/login/{name}/callback'
+    previous_redirect = previous_redirects[name]
+    if not os.environ.get(redirect_key) and (
+            not previous_redirect or previous_redirect == previous_url + callback_path):
+        values[redirect_key] = values['APP_URL'].rstrip('/') + callback_path
+    for key in credential_keys:
+        values.setdefault(key, '')
 
 production = root / 'config/production.json'
 if not production.exists():
@@ -62,6 +71,7 @@ temporary.touch(mode=0o600, exist_ok=True)
 temporary.chmod(0o600)
 temporary.write_text(''.join(f'{key}={json.dumps(value)}\n' for key, value in values.items()))
 temporary.replace(env_file)
-print('Runtime configuration saved; OAuth ' +
-      ('configured' if values.get('GITHUB_OAUTH_CLIENT_ID') and values.get('GITHUB_OAUTH_CLIENT_SECRET')
-       else 'awaiting GitHub OAuth App credentials'))
+print('Runtime configuration saved; OAuth: ' + ', '.join(
+    name + (' configured' if all(values.get(key) for key in keys)
+            else ' awaiting credentials')
+    for name, keys in providers.items()))
