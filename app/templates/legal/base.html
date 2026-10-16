@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Hackneo 的隐私政策与服务条款，说明账号登录、个人资料、简历分享和数据处理方式。">
+    <title>{{ title }}</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #f6f7f8; color: #252a32; font: 16px/1.85 system-ui, -apple-system, sans-serif; }
+      header, main, footer { max-width: 820px; margin: auto; }
+      header { padding: 28px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+      .brand { color: #1f2937; font-size: 23px; font-weight: 750; text-decoration: none; }
+      nav { display: flex; flex-wrap: wrap; gap: 18px; }
+      a { color: #246246; text-underline-offset: 4px; overflow-wrap: anywhere; }
+      a:focus-visible { outline: 3px solid #75b798; outline-offset: 4px; }
+      main { padding: 38px 42px; border: 1px solid #e3e7e5; border-radius: 16px; background: white; }
+      h1 { font-size: 30px; line-height: 1.4; margin: 0 0 8px; }
+      h2 { font-size: 20px; margin: 30px 0 10px; }
+      p { margin: 10px 0; }
+      ul { padding-left: 24px; }
+      li { margin: 8px 0; }
+      .updated { color: #66716c; font-size: 14px; margin-bottom: 26px; }
+      footer { padding: 24px; color: #66716c; font-size: 14px; }
+      @media (max-width: 600px) {
+        header { align-items: flex-start; }
+        main { margin: 0 12px; padding: 26px 22px; }
+        h1 { font-size: 27px; }
+        nav { gap: 8px 14px; font-size: 14px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/">Hackneo</a>
+      <nav aria-label="网站政策">
+        <a href="/">返回首页</a>
+        <a href="/legal/privacy">隐私政策</a>
+        <a href="/legal/terms">服务条款</a>
+      </nav>
+    </header>
+    <main>{% block content %}{% endblock %}</main>
+    <footer>Hackneo · <a href="mailto:lgb835485368@gmail.com">lgb835485368@gmail.com</a></footer>
+  </body>
+</html>

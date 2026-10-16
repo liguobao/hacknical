@@ -1,0 +1,35 @@
+{% extends "legal/base.html" %}
+{% block content %}
+<h1>隐私政策</h1>
+<p class="updated">Privacy Policy · 更新日期：2026 年 10 月 16 日</p>
+<p>本政策适用于李国宝维护的 Hackneo 网站（<a href="https://hackneo.cn">hackneo.cn</a>），说明账号登录、GitHub 数据展示、简历编辑与分享过程中如何处理信息。</p>
+
+<h2>1. 我们处理哪些信息</h2>
+<ul>
+  <li><strong>Google 登录：</strong>在你授权后获取 Google 账号标识、已验证的邮箱、名称和头像，用于识别账号、显示个人资料和建立登录会话。当前只请求 openid、email、profile，不请求 Gmail 邮件、通讯录、Google Drive 文件或日历权限。</li>
+  <li><strong>其他登录方式：</strong>GitHub 登录会处理账号标识、个人资料和用于读取 GitHub 数据的访问令牌；知乎登录启用后会处理授权返回的账号标识和个人资料。本地注册会保存用户名、邮箱和经过加盐哈希处理的密码。</li>
+  <li><strong>你填写的内容：</strong>包括个人简介、联系方式、教育与工作经历、项目介绍、头像及其他简历内容。</li>
+  <li><strong>访问和运行信息：</strong>包括请求时间、IP 地址、浏览器、设备类型、页面访问和错误日志。公开简历和 GitHub 展示页的访问记录可用于向内容所有者提供浏览统计。</li>
+</ul>
+
+<h2>2. 信息如何使用和保存</h2>
+<p>信息用于账号认证、维护会话、提供个人资料和简历功能、读取你授权的 GitHub 数据、统计页面访问以及排查服务故障。Google 登录取得的已验证邮箱可能用于关联已有的同邮箱账号。</p>
+<p>账号、第三方身份资料及访问令牌、简历和会话记录保存在服务端数据库，上传文件和日志保存在服务端存储。网站使用 HTTPS 和登录会话 Cookie；会话 Cookie 中保存会话标识，OAuth 访问令牌保存在服务端。退出登录会移除当前服务端会话，但不等于删除账号或历史数据。</p>
+<p>账号和简历数据在提供相关功能期间保留，直至你删除可自行管理的内容或联系维护者申请删除。日志和备份可能保留历史信息，提出删除申请时可以同时询问相关保留与清理情况。</p>
+
+<h2>3. 分享和第三方服务</h2>
+<p>你可以控制简历版本的公开状态。开启分享后，访问者可以查看、复制或下载公开内容；关闭分享不能撤回他人已经保存的副本。请在公开前检查联系方式及其他个人信息。</p>
+<p>登录过程会与所选身份提供方交换必要的授权信息，读取 GitHub 数据时会访问 GitHub。生产网站还加载 Google Analytics 和 LogRocket，可能处理设备、页面访问、交互及会话回放等诊断信息；这些服务按各自政策处理接收到的数据。</p>
+<ul>
+  <li><a href="https://policies.google.com/privacy" rel="noopener noreferrer">Google 隐私政策</a></li>
+  <li><a href="https://logrocket.com/privacy/" rel="noopener noreferrer">LogRocket 隐私政策</a></li>
+</ul>
+<p>Google 账号资料用于本政策说明的登录与账号功能，不用于出售、个性化广告或训练通用人工智能模型。若需扩大 Google 数据使用范围，将更新说明并在需要时重新征求授权。必要的托管、运行维护或法律要求可能涉及对相关信息的处理或提供。</p>
+
+<h2>4. 你的选择</h2>
+<p>你可以修改个人资料、编辑或删除简历版本、关闭分享，以及退出登录。你可以在 <a href="https://myaccount.google.com/connections" rel="noopener noreferrer">Google 账号的第三方连接设置</a>撤销 Hackneo 的授权；撤销授权不会自动删除本站已保存的数据。</p>
+<p>如需查询、更正或删除账号、第三方身份资料、令牌、简历或上传文件，请通过 <a href="mailto:lgb835485368@gmail.com">lgb835485368@gmail.com</a>联系维护者。我们会核验请求与你的账号的关系后处理；请勿在公开 Issue 中提交密码、令牌或私人简历。</p>
+
+<h2>5. 政策更新与联系</h2>
+<p>数据处理方式发生变化时，本页面会更新日期和内容。对使用范围有实质影响的变更，会在适当位置说明，并在需要时征求同意。隐私问题请联系 <a href="mailto:lgb835485368@gmail.com">lgb835485368@gmail.com</a>。</p>
+{% endblock %}

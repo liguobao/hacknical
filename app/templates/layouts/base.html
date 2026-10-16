@@ -65,6 +65,10 @@
     {% endblock %}
     {% if not hideFooter %}
       <div id="footer"></div>
+      <nav aria-label="Privacy and terms" style="display:flex;justify-content:center;gap:20px;padding:16px;background:#fff;font-size:13px;line-height:1.6;">
+        <a href="/legal/privacy">{% if locale === 'en-US' %}Privacy Policy{% else %}隐私政策{% endif %}</a>
+        <a href="/legal/terms">{% if locale === 'en-US' %}Terms of Service{% else %}服务条款{% endif %}</a>
+      </nav>
     {% endif %}
   </body>
   <script>
