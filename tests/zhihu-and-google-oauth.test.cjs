@@ -264,7 +264,7 @@ test('Zhihu OAuth authorization and callback flow', async () => {
   assert.equal((await invalidClient.get(`/api/user/login/zhihu/callback?code=good&state=wrong`)).status, 400)
 
   // 3. Callback success
-  const callbackRes = await client.get(`/api/user/login/zhihu/callback?code=good&state=${state}`)
+  const callbackRes = await client.get(`/api/user/login/zhihu/callback?authorization_code=good&state=${state}`)
   assert.equal(callbackRes.status, 302)
   const location = callbackRes.headers.get('location')
   assert.match(location, /^\/zhihu_coder/)

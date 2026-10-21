@@ -203,7 +203,8 @@ const startZhihuLogin = async (ctx) => {
 
 const loginByZhihu = async (ctx) => {
   ctx.set('Cache-Control', 'no-store')
-  const { code, state, error } = ctx.request.query
+  const { authorization_code: authorizationCode, code: legacyCode, state, error } = ctx.request.query
+  const code = authorizationCode || legacyCode
   const pending = ctx.session.zhihuOAuth
   delete ctx.session.zhihuOAuth
 
