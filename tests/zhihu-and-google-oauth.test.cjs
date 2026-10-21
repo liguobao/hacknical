@@ -267,7 +267,7 @@ test('Zhihu OAuth authorization and callback flow', async () => {
   const callbackRes = await client.get(`/api/user/login/zhihu/callback?authorization_code=good&state=${state}`)
   assert.equal(callbackRes.status, 302)
   const location = callbackRes.headers.get('location')
-  assert.match(location, /^\/zhihu_coder/)
+  assert.equal(location, '/zhihukaifazhejia')
 
   // 4. Verify DB persistence
   const db = new DatabaseSync(database)
@@ -304,6 +304,24 @@ test('Zhihu OAuth authorization and callback flow', async () => {
   const dbCheck = new DatabaseSync(database)
   assert.equal(dbCheck.prepare("SELECT COUNT(*) AS count FROM users WHERE auth_provider = 'zhihu'").get().count, 1)
   dbCheck.close()
+
+  // Legacy hash IDs migrate on login; explicit names survive subsequent OAuth logins.
+  const migrationDb = new DatabaseSync(database)
+  migrationDb.prepare('UPDATE users SET github_login = ? WHERE user_id = ?').run('abcdef1234567890abcd', user.user_id)
+  const migratedClient = browser()
+  const migrationStart = await migratedClient.get('/api/user/login/zhihu')
+  const migrationState = new URL(migrationStart.headers.get('location')).searchParams.get('state')
+  assert.equal((await migratedClient.get(`/api/user/login/zhihu/callback?code=good&state=${migrationState}`)).headers.get('location'), location)
+  const migratedData = JSON.parse(migrationDb.prepare('SELECT data FROM users WHERE user_id = ?').get(user.user_id).data)
+  migrationDb.prepare('UPDATE users SET github_login = ?, data = ? WHERE user_id = ?')
+    .run('custom-public-id', JSON.stringify({ ...migratedData, customLogin: true }), user.user_id)
+  const customClient = browser()
+  const customStart = await customClient.get('/api/user/login/zhihu')
+  const customState = new URL(customStart.headers.get('location')).searchParams.get('state')
+  assert.equal((await customClient.get(`/api/user/login/zhihu/callback?code=good&state=${customState}`)).headers.get('location'), '/custom-public-id')
+  assert.equal((await client.get('/api/user/info')).status, 200)
+  assert.equal((await (await client.get('/api/user/info')).json()).result.login, 'custom-public-id')
+  migrationDb.close()
 
   // 7. Error handling
   const clientErr = browser()

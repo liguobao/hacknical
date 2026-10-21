@@ -465,6 +465,46 @@ test('resume ids do not grant access to another account', async () => {
   assert.equal(publicInfo.json.result.resumeHash, ownerResumeHash)
 })
 
+test('public user ID changes are unique, authenticated and preserve resumes and login', async () => {
+  const owner = browser()
+  await owner.get('/')
+  await owner.post('/api/user/signup', {
+    username: 'rename-owner', email: 'rename-owner@example.com', password: 'password123', inviteCode: 'MULTI-CODE-1'
+  })
+  await owner.get('/rename-owner')
+  const before = (await owner.get('/api/resume/list')).json.result
+  const other = browser()
+  await other.get('/')
+  await other.post('/api/user/signup', {
+    username: 'rename-other', email: 'rename-other@example.com', password: 'password123', inviteCode: 'MULTI-CODE-2'
+  })
+  await other.get('/rename-other')
+  const visitor = browser()
+  await visitor.get('/')
+  assert.equal((await visitor.patch('/api/user/login-id', { login: 'new-name' })).status, 401)
+  for (const login of ['api', 'legal', 'a', '../oops', 'has space']) {
+    assert.equal((await owner.patch('/api/user/login-id', { login })).status, 400)
+  }
+  assert.equal((await owner.patch('/api/user/login-id', { login: 'RENAME-OTHER' })).status, 409)
+  const results = await Promise.all([
+    owner.patch('/api/user/login-id', { login: 'unique-name' }),
+    other.patch('/api/user/login-id', { login: 'UNIQUE-NAME' })
+  ])
+  assert.deepEqual(results.map(r => r.status).sort(), [200, 409])
+  const winner = results[0].status === 200 ? owner : other
+  assert.equal((await winner.get('/api/user/info')).json.result.login, 'unique-name')
+  if (winner === owner) {
+    assert.equal((await owner.get('/api/resume/list')).json.result[0].resumeId, before[0].resumeId)
+    assert.equal((await owner.get('/rename-owner/resume')).headers.get('location'), '/404')
+  }
+  assert.equal((await winner.patch('/api/user/login-id', { login: 'UNIQUE-NAME' })).status, 200)
+  const { DatabaseSync } = require('node:sqlite')
+  const db = new DatabaseSync(database)
+  assert.throws(() => db.prepare('UPDATE users SET github_login = ? WHERE github_login = ?')
+    .run('UNIQUE-NAME', results[0].status === 200 ? 'rename-other' : 'rename-owner'), /UNIQUE constraint failed/)
+  db.close()
+})
+
 test('smooth migration from legacy schema with existing data (no is_default column initially)', async () => {
   await stop()
 

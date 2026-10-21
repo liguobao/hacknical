@@ -32,6 +32,7 @@ const resumeParamsFormatter = async (ctx, source, pinyinSource = null) => {
 
   if (key === 'login') {
     const user = await network.user.getUser({ login: value })
+    if (!user) return null
     const qs = {
       userId: user.userId
     }
@@ -52,6 +53,7 @@ const resumeEnable = (source = 'params.login', pinyinSource = null) => async (ct
   const { userId } = ctx.session
 
   const qs = await resumeParamsFormatter(ctx, source, pinyinSource)
+  if (!qs) return ctx.redirect('/404')
   const resumeInfo = await network.user.getResumeInfo(qs)
 
   if (

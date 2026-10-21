@@ -223,6 +223,8 @@ if (existingResumeCols.has('pinyin')) {
   }
 }
 
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_login_nocase ON users (github_login COLLATE NOCASE);')
+
 db.exec('CREATE INDEX IF NOT EXISTS idx_resumes_user_id ON resumes (user_id);')
 db.exec('CREATE INDEX IF NOT EXISTS idx_resumes_resume_hash ON resumes (resume_hash);')
 db.exec('CREATE INDEX IF NOT EXISTS idx_resumes_user_default ON resumes (user_id, is_default);')

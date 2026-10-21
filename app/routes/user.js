@@ -22,6 +22,8 @@ router.get(
 )
 
 // API
+router.patch('/login-id', User.renameLogin)
+
 router.get(
   '/clearCache',
   check.query('login'),

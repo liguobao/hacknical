@@ -378,6 +378,25 @@ const patchUserInfo = async (ctx) => {
   }
 }
 
+const renameLogin = async (ctx) => {
+  const { userId } = ctx.session
+  if (!userId) {
+    ctx.status = 401
+    ctx.body = { success: false, message: '请先登录' }
+    return
+  }
+  try {
+    const user = await network.user.renameLogin(userId, ctx.request.body.login)
+    ctx.session.githubLogin = user.githubLogin
+    ctx.session.login = user.githubLogin
+    ctx.body = { success: true, result: { login: user.githubLogin } }
+  } catch (err) {
+    if (![400, 404, 409].includes(err.status)) throw err
+    ctx.status = err.status
+    ctx.body = { success: false, message: err.message }
+  }
+}
+
 const getUnreadNotifies = async (ctx) => {
   const { userId, locale } = ctx.session
 
@@ -436,6 +455,7 @@ export default {
   logout,
   clearCache,
   getUserInfo,
+  renameLogin,
   getGitHubSections,
   patchUserInfo,
   initialFinished,

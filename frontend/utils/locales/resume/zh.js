@@ -30,6 +30,11 @@ const datas = {
     chooseTemplate: '简历模板选择',
     contributeTemplate: '有更好的模板建议？在 issue 里提出反馈',
     resumes: {
+      userIdLabel: '用户 ID',
+      saveUserId: '保存 ID',
+      savingUserId: '保存中…',
+      userIdHelp: '3–32 位字母、数字、下划线或短横线，以字母或数字开头，全站唯一。修改会影响所有简历，旧地址将失效。GitHub 账号请在 GitHub 修改。',
+
       title: '多简历管理',
       switchTip: '切换 / 管理多份简历',
       current: '当前简历',

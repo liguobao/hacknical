@@ -119,3 +119,9 @@ export const saveOAuthUser = data => ({
   method: 'post',
   url: '/user/oauth/save'
 })
+
+export const renameLogin = (userId, login) => ({
+  body: { userId, login },
+  method: 'patch',
+  url: '/user/login-id'
+})

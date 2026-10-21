@@ -1,6 +1,8 @@
 
 import API from './base'
 
+const renameLogin = login => API.patch('/user/login-id', { login })
+
 const logout = () => API.get('/user/logout')
 
 const getUserInfo = login => API.get('/user/info', { login })
@@ -19,6 +21,7 @@ const getOAuthStatus = () => API.get('/user/oauth/status')
 
 export default {
   logout,
+  renameLogin,
   initialed,
   signup,
   loginByLocal,

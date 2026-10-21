@@ -4,7 +4,16 @@ import db, { parseJson, stringifyJson } from './sqlite'
 export default {
   async get(key) {
     const row = db.prepare('SELECT data FROM sessions WHERE id = ? AND expires_at > ?').get(key, Date.now())
-    return row ? parseJson(row.data) : null
+    if (!row) return null
+    const value = parseJson(row.data)
+    if (value && value.userId) {
+      const user = db.prepare('SELECT github_login FROM users WHERE user_id = ?').get(value.userId)
+      if (user) {
+        value.githubLogin = user.github_login
+        value.login = user.github_login
+      }
+    }
+    return value
   },
   async set(key, value, maxAge) {
     const timestamp = Date.now()

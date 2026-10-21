@@ -295,3 +295,40 @@
     border-left: 2px solid var(--oc-gray-4);
   }
 }
+
+.loginEditor {
+  margin-bottom: 18px;
+  color: var(--oc-gray-8);
+
+  & label { display: block; margin-bottom: 8px; font-weight: 500; }
+  & p { margin: 8px 0 0; font-size: 12px; line-height: 1.6; }
+}
+
+.loginEditorRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  & input {
+    flex: 1;
+    min-width: 100px;
+    width: 100px;
+    padding: 8px;
+    border: 1px solid var(--oc-gray-5);
+    border-radius: 2px;
+    color: var(--oc-gray-9);
+    background: var(--oc-white);
+  }
+  & button {
+    padding: 8px 12px;
+    border: 1px solid var(--oc-green-8);
+    background: var(--oc-green-8);
+    color: var(--oc-white);
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  & button:disabled { opacity: 0.6; cursor: default; }
+  & button:hover:enabled { background: var(--oc-green-9); }
+  & input:focus-visible, & button:focus-visible { outline: 2px solid var(--oc-green-8); outline-offset: 2px; }
+}

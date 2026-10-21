@@ -30,6 +30,11 @@ const datas = {
     chooseTemplate: 'Choose resume template',
     contributeTemplate: 'Have advice for template? Come to create issue!',
     resumes: {
+      userIdLabel: 'User ID',
+      saveUserId: 'Save ID',
+      savingUserId: 'Saving…',
+      userIdHelp: '3–32 letters, numbers, underscores or hyphens; start with a letter or number. Must be unique across the site. Changes affect all resumes; previous URLs stop working. For GitHub accounts, change your ID on GitHub.',
+
       title: 'Resume Manager',
       switchTip: 'Switch / Manage Resumes',
       current: 'Current Resume',

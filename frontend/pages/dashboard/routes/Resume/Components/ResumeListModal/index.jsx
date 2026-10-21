@@ -12,6 +12,7 @@ import {
 } from 'light-ui'
 import locales from 'LOCALES'
 import Icon from 'COMPONENTS/Icon'
+import API from 'API'
 import message from 'UTILS/message'
 import dateHelper from 'UTILS/date'
 import styles from '../../styles/resume_list_modal.css'
@@ -46,6 +47,8 @@ class ResumeListModal extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      loginDraft: props.login,
+      savingLogin: false,
       isCreating: false,
       newTitle: '',
       renamingId: null,
@@ -78,6 +81,22 @@ class ResumeListModal extends React.Component {
       renamingId: null,
       renamingTitle: ''
     })
+  }
+
+  async handleLoginSubmit(event) {
+    event.preventDefault()
+    if (this.state.savingLogin) return
+    this.setState({ savingLogin: true })
+    try {
+      const result = await API.user.renameLogin(this.state.loginDraft)
+      if (result && result.login) {
+        const path = window.location.pathname.split('/')
+        path[1] = result.login
+        window.location.assign(`${path.join('/')}${window.location.search}${window.location.hash}`)
+      }
+    } finally {
+      this.setState({ savingLogin: false })
+    }
   }
 
   handleCopyLink(url) {
@@ -136,6 +155,29 @@ class ResumeListModal extends React.Component {
               </ClassicButton>
             )}
           </div>
+
+          <form className={styles.loginEditor} onSubmit={event => this.handleLoginSubmit(event)}>
+            <label htmlFor="resume-user-id">{modalTexts.userIdLabel}</label>
+            <div className={styles.loginEditorRow}>
+              <span>{`${origin}/`}</span>
+              <input
+                id="resume-user-id"
+                value={this.state.loginDraft}
+                onChange={event => this.setState({ loginDraft: event.target.value })}
+                pattern="[A-Za-z0-9][A-Za-z0-9_-]{2,31}"
+                minLength={3}
+                maxLength={32}
+                required
+                autoComplete="off"
+                aria-describedby="resume-user-id-help"
+              />
+              <span>/resume</span>
+              <button type="submit" disabled={this.state.savingLogin || this.state.loginDraft === login}>
+                {this.state.savingLogin ? modalTexts.savingUserId : modalTexts.saveUserId}
+              </button>
+            </div>
+            <p id="resume-user-id-help">{modalTexts.userIdHelp}</p>
+          </form>
 
           {isCreating && (
             <div className={styles.createArea}>

@@ -6,7 +6,7 @@ import { titleToPinyin } from '../../utils/pinyin'
 const RESERVED_USERNAMES = new Set([
   'api', 'login', 'logout', 'resume', 'github', 'initial',
   '404', '500', 'dashboard', 'user', 'settings', 'admin',
-  'administrator', 'root', 'static', 'assets', 'public'
+  'administrator', 'root', 'static', 'assets', 'public', 'legal', 'healthz'
 ])
 
 const DEFAULT_RESUME_SECTIONS = [
@@ -396,6 +396,30 @@ const updateUser = async (userId, changes = {}) => {
   return getUser({ userId })
 }
 
+// The public URL name is separate from the immutable internal user_id.
+const renameLogin = async (userId, requestedLogin) => {
+  const row = findUserRow({ userId })
+  if (!row) throw Object.assign(new Error('账号不存在'), { status: 404 })
+  if (row.auth_provider === 'github') {
+    throw Object.assign(new Error('GitHub 账号的用户 ID 请在 GitHub 修改'), { status: 400 })
+  }
+  const login = typeof requestedLogin === 'string' ? requestedLogin.trim().toLowerCase() : ''
+  if (!/^[a-z0-9][a-z0-9_-]{2,31}$/.test(login) || RESERVED_USERNAMES.has(login)) {
+    throw Object.assign(new Error('用户 ID 须为 3–32 位字母、数字、下划线或短横线，以字母或数字开头，且不能使用系统保留名称'), { status: 400 })
+  }
+  const data = { ...parseJson(row.data, {}), login, customLogin: true }
+  try {
+    db.prepare('UPDATE users SET github_login = ?, data = ?, updated_at = ? WHERE user_id = ?')
+      .run(login, stringifyJson(data), now(), userId)
+  } catch (err) {
+    if (String(err.message).includes('UNIQUE constraint failed')) {
+      throw Object.assign(new Error('这个用户 ID 已被占用，请换一个'), { status: 409 })
+    }
+    throw err
+  }
+  return getUser({ userId })
+}
+
 const getUserCount = async () => {
   const row = db.prepare('SELECT COUNT(*) AS count FROM users').get()
   return row.count
@@ -744,8 +768,13 @@ const saveOAuthUser = async ({ provider, profile = {}, token = '', expiresAt = n
   const timestamp = now()
 
   if (identityRow) {
-    const userRow = db.prepare('SELECT * FROM users WHERE user_id = ?').get(identityRow.user_id)
+    let userRow = db.prepare('SELECT * FROM users WHERE user_id = ?').get(identityRow.user_id)
     if (userRow) {
+      if (provider === 'zhihu' && profile.name && /^[a-f0-9]{20}$/.test(userRow.github_login)
+        && !parseJson(userRow.data, {}).customLogin) {
+        await renameLogin(userRow.user_id, generateUniqueLogin(titleToPinyin(profile.name), provider))
+        userRow = db.prepare('SELECT * FROM users WHERE user_id = ?').get(identityRow.user_id)
+      }
       const existingData = parseJson(userRow.data, {})
       const updatedData = {
         ...existingData,
@@ -808,7 +837,9 @@ const saveOAuthUser = async ({ provider, profile = {}, token = '', expiresAt = n
   }
 
   // Create new user
-  const seed = (provider === 'google' && profile.email)
+  const seed = provider === 'zhihu' && profile.name
+    ? titleToPinyin(profile.name)
+    : (provider === 'google' && profile.email)
     ? profile.email.split('@')[0]
     : (profile.account || (profile.email ? profile.email.split('@')[0] : '') || profile.name || provider)
   const login = generateUniqueLogin(seed, provider)
@@ -863,6 +894,7 @@ const saveOAuthUser = async ({ provider, profile = {}, token = '', expiresAt = n
 
 export default {
   getUser,
+  renameLogin,
   createUser,
   updateUser,
   getUserCount,
