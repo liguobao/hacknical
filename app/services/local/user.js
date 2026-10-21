@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto'
+import { randomUUID, randomInt } from 'node:crypto'
 import db, { now, parseJson, stringifyJson } from '../../utils/sqlite'
 import { hashPassword, verifyPassword } from '../../utils/password'
 import { titleToPinyin } from '../../utils/pinyin'
@@ -741,16 +741,21 @@ const generateUniqueLogin = (seed = 'user', preferredPrefix = '') => {
   if (!base || base.length < 3) {
     base = preferredPrefix ? `${preferredPrefix}_${randomUUID().replace(/-/g, '').slice(0, 8)}` : `u_${randomUUID().replace(/-/g, '').slice(0, 8)}`
   }
-  let candidate = base
-  let counter = 1
-  while (true) {
-    if (!RESERVED_USERNAMES.has(candidate.toLowerCase())) {
-      const existing = db.prepare('SELECT user_id FROM users WHERE lower(github_login) = lower(?)').get(candidate)
-      if (!existing) return candidate
-    }
-    candidate = `${base}_${counter}`
-    counter += 1
+  const available = candidate => !RESERVED_USERNAMES.has(candidate)
+    && !db.prepare('SELECT user_id FROM users WHERE lower(github_login) = lower(?)').get(candidate)
+  if (available(base)) return base
+
+  // Draw without replacement so repeated collisions cannot loop forever.
+  const suffixes = Array.from({ length: 9000 }, (_, index) => index + 1000)
+  while (suffixes.length) {
+    const index = randomInt(suffixes.length)
+    const suffix = suffixes[index]
+    suffixes[index] = suffixes[suffixes.length - 1]
+    suffixes.pop()
+    const candidate = `${base}_${suffix}`
+    if (available(candidate)) return candidate
   }
+  throw new Error('无法生成唯一用户 ID，请更换昵称后重试')
 }
 
 const findOAuthIdentity = (provider, providerUserId) => {

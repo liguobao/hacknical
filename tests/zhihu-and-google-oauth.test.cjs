@@ -134,7 +134,7 @@ before(async () => {
         expires_in: 7200,
         token_type: 'bearer',
         data: {
-          open_id: code === 'second-user' ? 'zh-open-id-2' : 'zh-open-id-1',
+          open_id: ['second-user', 'same-name'].includes(code) ? 'zh-open-id-2' : 'zh-open-id-1',
           account: code === 'second-user' ? 'zhihu_coder_2' : 'zhihu_coder',
           name: code === 'second-user' ? '知乎开发者乙' : '知乎开发者甲',
           headline: '代码写得好，下班走得早'
@@ -321,6 +321,17 @@ test('Zhihu OAuth authorization and callback flow', async () => {
   assert.equal((await customClient.get(`/api/user/login/zhihu/callback?code=good&state=${customState}`)).headers.get('location'), '/custom-public-id')
   assert.equal((await client.get('/api/user/info')).status, 200)
   assert.equal((await (await client.get('/api/user/info')).json()).result.login, 'custom-public-id')
+  migrationDb.prepare('UPDATE users SET github_login = ? WHERE user_id = ?').run('zhihukaifazhejia', user.user_id)
+  zhihuProfileFailure = true
+  try {
+    const collisionClient = browser()
+    const collisionStart = await collisionClient.get('/api/user/login/zhihu')
+    const collisionState = new URL(collisionStart.headers.get('location')).searchParams.get('state')
+    const collisionResult = await collisionClient.get(`/api/user/login/zhihu/callback?code=same-name&state=${collisionState}`)
+    assert.match(collisionResult.headers.get('location'), /^\/zhihukaifazhejia_[1-9][0-9]{3}$/)
+  } finally {
+    zhihuProfileFailure = false
+  }
   migrationDb.close()
 
   // 7. Error handling
